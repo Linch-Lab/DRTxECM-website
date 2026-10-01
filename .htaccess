@@ -1,0 +1,75 @@
+# DRTxECM 靜態網站 — Apache 設定（Hostinger / cPanel 適用）
+
+# 預設首頁
+DirectoryIndex index.html
+
+# 自訂 404
+ErrorDocument 404 /404.html
+
+# 強制 HTTPS（Hostinger 免費 SSL 啟用後生效）
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteCond %{HTTPS} off
+  RewriteCond %{HTTP:X-Forwarded-Proto} !https
+  RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</IfModule>
+
+# Gzip 壓縮
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml
+  AddOutputFilterByType DEFLATE application/javascript application/json
+  AddOutputFilterByType DEFLATE image/svg+xml
+</IfModule>
+
+# 快取策略
+#
+# HTML 一定要「每次重新驗證」。Hostinger 前面有 CDN（回應標頭 Server: hcdn），
+# 若把 HTML 設成長快取，部署後訪客最多會看到好幾小時前的舊版內容。
+# 靜態素材（CSS／圖檔）才適合快取。
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/html        "access plus 0 seconds"
+  ExpiresByType text/css         "access plus 1 hour"
+  ExpiresByType image/png        "access plus 1 hour"
+  ExpiresByType image/jpeg       "access plus 1 hour"
+  ExpiresByType image/svg+xml    "access plus 1 hour"
+  ExpiresByType image/x-icon     "access plus 1 hour"
+  ExpiresByType application/zip  "access plus 1 year"
+</IfModule>
+
+# 基本安全標頭 + 明確的快取控制
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+
+  # HTML 一律重新驗證：確保部署後立刻生效
+  <FilesMatch "\.(html|htm)$">
+    Header set Cache-Control "no-cache, must-revalidate, max-age=0"
+  </FilesMatch>
+  # 樣式
+  <FilesMatch "\.(css|js)$">
+    Header set Cache-Control "public, max-age=3600"
+  </FilesMatch>
+  # 圖片
+  <FilesMatch "\.(png|jpe?g|gif|svg|ico|webp)$">
+    Header set Cache-Control "public, max-age=3600"
+  </FilesMatch>
+  # 應用程式更新檢查檔必須即時，不可被快取
+  <FilesMatch "^latest\.json$">
+    Header set Cache-Control "no-cache, must-revalidate, max-age=0"
+  </FilesMatch>
+</IfModule>
+
+# 不要列出目錄內容
+Options -Indexes
+
+# ---- 保護原始碼與文件 ----
+# Hostinger 的 Git 匯入會把整個倉庫複製到網域根目錄，
+# 這裡擋掉不該被瀏覽的建置腳本、CI 設定與文件。
+#
+# 注意：這只是「不讓瀏覽器顯示」，並非權限保護。程式碼本來就是公開的。
+RedirectMatch 404 ^/tools/
+RedirectMatch 404 ^/\.github/
+RedirectMatch 404 ^/\.git
+RedirectMatch 404 ^/\.[^/]+$
+RedirectMatch 404 (?i)\.(md|py|bat|ps1|spec|log|txt)$

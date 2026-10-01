@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>引用與致謝 - DRTxECM</title>
+<meta name="description" content="DRTxECM 的引用方式、必引的 pyDRTtools 原始文獻清單（含 DOI）、授權說明與致謝。">
+<link rel="canonical" href="https://drtxecm.billlinch.com/cite.html">
+<link rel="alternate" hreflang="zh-Hant" href="https://drtxecm.billlinch.com/cite.html">
+<link rel="alternate" hreflang="en" href="https://drtxecm.billlinch.com/en/cite.html">
+<link rel="alternate" hreflang="x-default" href="https://drtxecm.billlinch.com/cite.html">
+<link rel="icon" href="assets/app.ico">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://drtxecm.billlinch.com/cite.html">
+<meta property="og:title" content="引用與致謝 - DRTxECM">
+<meta property="og:description" content="使用 DRTxECM 時應該引用哪些文獻。">
+<meta property="og:image" content="https://drtxecm.billlinch.com/assets/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="site">
+  <p class="brand"><a href="index.html"><img src="assets/logo.svg" alt="DRTxECM" height="30"></a></p>
+  <span class="ver">v0.2.0</span>
+  <span class="spacer"></span>
+  <span class="lang"><a href="en/cite.html">English</a></span>
+</header>
+
+<nav class="site">
+  <a href="index.html">首頁</a>
+  <a href="download.html">下載</a>
+  <a href="guide.html">使用說明</a>
+  <a href="method.html">方法與原理</a>
+  <a href="faq.html">常見問題</a>
+  <a class="here" href="cite.html">引用與致謝</a>
+</nav>
+
+<h1>引用與致謝</h1>
+<p class="lead">
+DRTxECM 站在 pyDRTtools 之上。<b>DRT 的計算結果是 pyDRTtools 的成果</b>，
+所以使用時務必引用對應的原始文獻。這一頁把該引什麼、什麼時候引，整理清楚。
+</p>
+
+<h2>引用 DRTxECM 本身</h2>
+
+<p>
+DRTxECM 目前<b>尚未有正式發表的論文</b>。若你需要標註所使用的工具，
+可以引用軟體倉庫本身：
+</p>
+
+<pre>@software{DRTxECM,
+  title        = {DRTxECM: A pyDRTtools Extension for CPE
+                  Phase-Angle-Aware Equivalent Circuit Modeling},
+  author       = {{Linch-Lab}},
+  year         = {2026},
+  version      = {0.2.0},
+  url          = {https://github.com/Linch-Lab/DRTxECM},
+  license      = {MIT},
+  note         = {Three-stage pipeline: DRT deconvolution,
+                  Gaussian peak decomposition,
+                  CNLS equivalent circuit fitting}
+}</pre>
+
+<p class="note">
+若日後有論文發表，這一頁會更新。你也可以直接引用
+<a href="https://github.com/Linch-Lab/DRTxECM">GitHub 倉庫</a>網址。
+</p>
+
+<h2>使用 DRT 計算結果時必引的文獻</h2>
+
+<p>
+DRTxECM 的 DRT 核心是 pyDRTtools。以下清單與 pyDRTtools 官方要求一致，
+編號也沿用 DRTxECM 的 README。
+</p>
+
+<h3>1. 基礎理論與離散化方法（<b>必引</b>）</h3>
+<p>
+只要使用了 DRT 的計算結果，就應該引用這一篇。它是 RBF 離散化與 DRTtools 的基礎。
+</p>
+<p>
+Wan, T. H., Saccoccio, M., Chen, C., &amp; Ciucci, F. (2015).
+<i>Influence of the discretization methods on the distribution of relaxation times
+deconvolution: implementing radial basis functions with DRTtools.</i>
+Electrochimica Acta, 184, 483&ndash;499.
+<a href="https://doi.org/10.1016/j.electacta.2015.09.097">doi:10.1016/j.electacta.2015.09.097</a>
+</p>
+
+<h3>2. 正則化參數的選擇</h3>
+<p>
+若你使用了 <code>GCV</code>、<code>mGCV</code>、<code>rGCV</code>、<code>LC</code>、
+<code>kf</code> 或 <code>re-im</code> 這些自動選擇 &lambda; 的方法，請一併引用。
+</p>
+<p>
+Maradesa, A., Py, B., Wan, T. H., Effat, M. B., &amp; Ciucci, F. (2023).
+<i>Selecting the Regularization Parameter in the Distribution of Relaxation Times.</i>
+Journal of The Electrochemical Society, 170, 030502.
+<a href="https://doi.org/10.1149/1945-7111/acbca4">doi:10.1149/1945-7111/acbca4</a>
+</p>
+
+<h3>3&ndash;4. 貝氏方法與可信區間</h3>
+<p>
+若你使用了 <b>Bayesian Run</b>，或在論文中呈現了貝氏可信區間，請引用這兩篇。
+</p>
+<p>
+Ciucci, F., &amp; Chen, C. (2015).
+<i>Analysis of electrochemical impedance spectroscopy data using the distribution of
+relaxation times: A Bayesian and hierarchical Bayesian approach.</i>
+Electrochimica Acta, 167, 439&ndash;454.
+<a href="https://doi.org/10.1016/j.electacta.2015.03.123">doi:10.1016/j.electacta.2015.03.123</a>
+</p>
+<p>
+Effat, M. B., &amp; Ciucci, F. (2017).
+<i>Bayesian and hierarchical Bayesian based regularization for deconvolving the
+distribution of relaxation times from electrochemical impedance spectroscopy data.</i>
+Electrochimica Acta, 247, 1117&ndash;1129.
+<a href="https://doi.org/10.1016/j.electacta.2017.07.050">doi:10.1016/j.electacta.2017.07.050</a>
+</p>
+
+<h3>5. Hilbert Transform（BHT）</h3>
+<p>
+若你使用了 <b>Hilbert Transform</b> 按鈕（BHT 方法）或 EIS Score，請引用這一篇。
+</p>
+<p>
+Liu, J., Wan, T. H., &amp; Ciucci, F. (2020).
+<i>A Bayesian view on the Hilbert transform and the Kramers-Kronig transform of
+electrochemical impedance data: Probabilistic estimates and quality scores.</i>
+Electrochimica Acta, 357, 136864.
+<a href="https://doi.org/10.1016/j.electacta.2020.136864">doi:10.1016/j.electacta.2020.136864</a>
+</p>
+
+<h2>延伸閱讀（GP-DRT 與方法綜述）</h2>
+
+<p>
+套件中的 <code>fGP.py</code> 實作了 GP-DRT（高斯過程）。若你使用它，
+可參考下列文獻：
+</p>
+
+<ul>
+  <li>
+    Liu, J., &amp; Ciucci, F. (2019).
+    <i>The Gaussian process distribution of relaxation times: a machine learning tool
+    for the analysis and prediction of electrochemical impedance spectroscopy data.</i>
+    Electrochimica Acta, 135316.
+    <a href="https://doi.org/10.1016/j.electacta.2019.135316">doi:10.1016/j.electacta.2019.135316</a>
+  </li>
+  <li>
+    Ciucci, F. (2020).
+    <i>The Gaussian process Hilbert transform (GP-HT): Testing the consistency of
+    electrochemical impedance spectroscopy data.</i>
+    Journal of The Electrochemical Society, 167(12), 126503.
+    <a href="https://doi.org/10.1149/1945-7111/aba937">doi:10.1149/1945-7111/aba937</a>
+  </li>
+  <li>
+    Ciucci, F. (2019).
+    <i>Modeling electrochemical impedance spectroscopy.</i>
+    Current Opinion in Electrochemistry, 13, 132&ndash;139.
+    <a href="https://doi.org/10.1016/j.coelec.2018.12.003">doi:10.1016/j.coelec.2018.12.003</a>
+  </li>
+  <li>
+    Saccoccio, M., Wan, T. H., Chen, C., &amp; Ciucci, F. (2014).
+    <i>Optimal regularization in distribution of relaxation times applied to
+    electrochemical impedance spectroscopy: ridge and lasso regression methods &mdash;
+    a theoretical and experimental study.</i>
+    Electrochimica Acta, 147, 470&ndash;482.
+    <a href="https://doi.org/10.1016/j.electacta.2014.09.058">doi:10.1016/j.electacta.2014.09.058</a>
+  </li>
+</ul>
+
+<h2>授權</h2>
+
+<p>
+DRTxECM 採用 <a href="https://github.com/Linch-Lab/DRTxECM/blob/master/LICENSE">MIT License</a>。
+</p>
+
+<table>
+  <tr><th style="width:40%">範圍</th><th>著作權</th></tr>
+  <tr>
+    <td>DRTxECM 的擴充與修改<br>（第二、三階段、資料匯入與清理介面）</td>
+    <td>&copy; Linch-Lab</td>
+  </tr>
+  <tr>
+    <td>pyDRTtools 原始內容<br>（DRT 計算核心）</td>
+    <td>&copy; Ciucci Lab（Francesco Ciucci 等）</td>
+  </tr>
+</table>
+
+<p>
+具體而言，DRT 計算核心（<code>basics.py</code>、<code>runs.py</code>、<code>BHT.py</code>、
+<code>HMC.py</code>、<code>fGP.py</code>、<code>parameter_selection.py</code>、
+<code>peak_analysis.py</code>、<code>nearest_PD.py</code>）保留 pyDRTtools 的原始實作；
+DRTxECM 的擴充位於 <code>extensions.py</code>，並修改了
+<code>GUI.py</code>、<code>layout.py</code> 與 <code>cli.py</code>。
+兩者都是 MIT 授權，因此組合與再散布都是允許的。
+</p>
+
+<p class="ok">
+MIT 授權允許自由使用、修改與散布，<b>包含商業用途</b>。
+唯一的實質條件是保留著作權與授權聲明。
+</p>
+
+<h2>致謝</h2>
+
+<p>
+本專案能夠存在，最要感謝 <b>Ciucci Lab</b>（香港科技大學／拜羅伊特大學）
+開發並以 MIT 授權釋出 <a href="https://github.com/ciuccislab/pyDRTtools">pyDRTtools</a>，
+以及更早期的 DRTtools。DRTxECM 的 DRT 階段完全是他們的成果。
+</p>
+
+<p>
+同時感謝 pyDRTtools 的使用者社群——回報的 issue 與討論，
+讓等效電路延伸功能的需求與邊界條件變得明確。
+</p>
+
+<h2>贊助</h2>
+
+<p>
+DRTxECM 完全免費、開源，<b>沒有廣告、沒有追蹤、沒有付費版本</b>。
+如果它替你省下了一些時間，歡迎請開發者喝一杯咖啡。
+</p>
+
+<table>
+  <tr><th style="width:30%">方式</th><th>連結</th></tr>
+  <tr><td>Ko-fi</td><td><a href="https://ko-fi.com/bill_linch">https://ko-fi.com/bill_linch</a></td></tr>
+</table>
+
+<p>
+<b>不會做的事</b>：不把功能鎖在贊助後面、不加廣告或追蹤、
+不情緒勒索、不讓贊助者插隊。
+</p>
+
+<footer class="site">
+  DRTxECM — DRT 與等效電路建模的開源整合工具 ·
+  <a href="https://github.com/Linch-Lab/DRTxECM/blob/master/LICENSE">MIT License</a><br>
+  <a href="https://github.com/Linch-Lab/DRTxECM">GitHub</a> ·
+  <a href="download.html">下載</a> ·
+  <a href="method.html">方法與原理</a> ·
+  <a href="cite.html">引用與致謝</a> ·
+  <a href="https://github.com/Linch-Lab/DRTxECM/issues">問題回報</a><br>
+  本頁為靜態網頁，不使用 JavaScript、不收集任何資料。
+</footer>
+
+</body>
+</html>

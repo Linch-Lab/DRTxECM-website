@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>下載 - DRTxECM</title>
+<meta name="description" content="下載 DRTxECM v0.2.0：Windows 64 位元免安裝 ZIP，含 SHA256 驗證方式、系統需求與從原始碼執行的說明。">
+<link rel="canonical" href="https://drtxecm.billlinch.com/download.html">
+<link rel="alternate" hreflang="zh-Hant" href="https://drtxecm.billlinch.com/download.html">
+<link rel="alternate" hreflang="en" href="https://drtxecm.billlinch.com/en/download.html">
+<link rel="alternate" hreflang="x-default" href="https://drtxecm.billlinch.com/download.html">
+<link rel="icon" href="assets/app.ico">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://drtxecm.billlinch.com/download.html">
+<meta property="og:title" content="下載 - DRTxECM">
+<meta property="og:description" content="Windows 64 位元免安裝 ZIP，解壓即用，不需安裝 Python。">
+<meta property="og:image" content="https://drtxecm.billlinch.com/assets/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="site">
+  <p class="brand"><a href="index.html"><img src="assets/logo.svg" alt="DRTxECM" height="30"></a></p>
+  <span class="ver">v0.2.0</span>
+  <span class="spacer"></span>
+  <span class="lang"><a href="en/download.html">English</a></span>
+</header>
+
+<nav class="site">
+  <a href="index.html">首頁</a>
+  <a class="here" href="download.html">下載</a>
+  <a href="guide.html">使用說明</a>
+  <a href="method.html">方法與原理</a>
+  <a href="faq.html">常見問題</a>
+  <a href="cite.html">引用與致謝</a>
+</nav>
+
+<h1>下載</h1>
+<p class="lead">目前版本 <b>v0.2.0</b> ｜ Windows 10 / 11（64 位元）</p>
+
+<div class="dl">
+  <a class="big" href="https://github.com/Linch-Lab/DRTxECM/releases/latest/download/DRTxECM-win64.zip">下載 DRTxECM-win64.zip</a>
+  <div class="meta">
+    免安裝 ｜ 解壓即用 ｜ 不需安裝 Python<br>
+    下載檔約 <b>122&nbsp;MB</b>，解壓後約 <b>332&nbsp;MB</b>（約 1,360 個檔案）<br>
+    直接點擊即開始下載，若瀏覽器沒有反應請見下方<a href="#trouble">下載疑難</a>
+  </div>
+</div>
+
+<h2>檔案說明</h2>
+
+<table>
+  <tr>
+    <th style="width:34%">檔案</th>
+    <th>說明</th>
+  </tr>
+  <tr>
+    <td><b>DRTxECM-win64.zip</b></td>
+    <td>主程式。解壓後執行 <code>DRTxECM.exe</code> 即可，免安裝。</td>
+  </tr>
+  <tr>
+    <td><b>SHA256SUMS.txt</b></td>
+    <td>檔案雜湊值，可驗證下載檔未被竄改。
+      <a href="https://github.com/Linch-Lab/DRTxECM/releases/latest">在 Releases 頁面取得</a></td>
+  </tr>
+  <tr>
+    <td><b>原始碼</b></td>
+    <td>Python 專案（PyQt5），可自行檢視或建置：
+      <a href="https://github.com/Linch-Lab/DRTxECM">GitHub</a></td>
+  </tr>
+  <tr>
+    <td><b>範例資料</b></td>
+    <td>倉庫內附 EIS 範例與教學 notebook：
+      <a href="https://github.com/Linch-Lab/DRTxECM/tree/master/tutorial">tutorial/</a>、
+      <a href="https://github.com/Linch-Lab/DRTxECM/tree/master/EIS%20data">EIS data/</a></td>
+  </tr>
+  <tr>
+    <td><b>使用手冊</b></td>
+    <td>pyDRTtools 原始手冊（PDF）：
+      <a href="https://github.com/Linch-Lab/DRTxECM/blob/master/manual/pyDRTtools_manual.pdf">pyDRTtools_manual.pdf</a></td>
+  </tr>
+  <tr>
+    <td><b>所有版本</b></td>
+    <td><a href="https://github.com/Linch-Lab/DRTxECM/releases">版本清單</a>（含變更紀錄）</td>
+  </tr>
+</table>
+
+<h2 id="verify">驗證下載檔（選用）</h2>
+
+<p>在命令提示字元執行：</p>
+<pre>certutil -hashfile DRTxECM-win64.zip SHA256</pre>
+<p>把輸出與 <code>SHA256SUMS.txt</code> 的內容比對，一致即表示檔案完整未被修改。</p>
+
+<h2>系統需求</h2>
+
+<table>
+  <tr><th style="width:34%">項目</th><th>需求</th></tr>
+  <tr><td>作業系統</td><td>Windows 10 / 11（64 位元）</td></tr>
+  <tr><td>Python</td><td><b>不需要</b>（已打包）</td></tr>
+  <tr><td>網路</td><td><b>不需要</b>。所有運算都在本機執行，資料不會上傳</td></tr>
+  <tr><td>記憶體</td><td>建議 8&nbsp;GB 以上（DRT 正則化與 CNLS 擬合會建立大型矩陣）</td></tr>
+  <tr><td>磁碟空間</td><td>解壓後約 332&nbsp;MB（下載檔約 122&nbsp;MB）</td></tr>
+  <tr><td>顯示</td><td>需要桌面環境（PyQt5 圖形介面）</td></tr>
+</table>
+
+<h2>安裝方式</h2>
+
+<ol>
+  <li>解壓 <code>DRTxECM-win64.zip</code> 到任意資料夾（例如 <code>C:\Tools\DRTxECM</code>）</li>
+  <li>執行 <code>DRTxECM.exe</code></li>
+  <li>首次啟動需要解壓與載入函式庫，會比之後慢一些（數秒到十數秒）</li>
+  <li>匯入 EIS 資料即可開始，操作流程見 <a href="guide.html">使用說明</a></li>
+</ol>
+
+<p class="note">
+請<b>先完整解壓再執行</b>，不要直接在 ZIP 壓縮檔裡面雙擊執行檔。
+Windows 的「壓縮資料夾」會讓程式無法正確讀取同資料夾的函式庫。
+</p>
+
+<h2>從原始碼執行（macOS / Linux）</h2>
+
+<p>
+打包好的免安裝版目前只提供 Windows。macOS 與 Linux 使用者可以從原始碼執行，
+需要 Python 3.10 與幾個科學計算套件：
+</p>
+
+<pre>git clone https://github.com/Linch-Lab/DRTxECM.git
+cd DRTxECM
+pip install numpy scipy pandas matplotlib scikit-learn cvxopt PyQt5 click
+python launch.py</pre>
+
+<p>
+完整說明（含沒有 git 時改用 ZIP 下載）請見
+<a href="https://github.com/Linch-Lab/DRTxECM/blob/master/INSTALL.md">INSTALL.md</a>。
+</p>
+
+<h2 id="trouble">下載疑難</h2>
+
+<h3>點了按鈕卻沒有開始下載？</h3>
+<p>
+按鈕連到 GitHub Releases 的檔案。若你的網路環境阻擋 GitHub，
+可以改用 <a href="https://github.com/Linch-Lab/DRTxECM/releases">Releases 頁面</a>手動選擇檔案，
+或使用 proxy。
+</p>
+
+<h3>Windows 顯示「不明的發行者」或 SmartScreen 警告？</h3>
+<p>
+因為本專案未購買程式碼簽章憑證。這是<b>所有免費開源軟體的共同情況</b>，並非病毒。
+你可以：點「更多資訊」→「仍要執行」；或<b>自行從原始碼建置</b>，
+以確保執行檔與原始碼一致。也可以用上面的 SHA256 驗證下載檔。
+</p>
+
+<h3>防毒軟體誤判？</h3>
+<p>
+PyInstaller 打包的執行檔偶爾會被誤判。本專案的建置流程刻意關閉了 UPX 壓縮
+（UPX 會明顯提高誤判率）。可先驗證 SHA256，或自行從原始碼建置。
+</p>
+
+<h3>解壓後執行卻跳出「找不到 xxx.dll」？</h3>
+<p>
+通常是沒有完整解壓就執行，或是解壓過程被中斷。請刪除整個資料夾重新解壓一次。
+</p>
+
+<footer class="site">
+  DRTxECM — DRT 與等效電路建模的開源整合工具 ·
+  <a href="https://github.com/Linch-Lab/DRTxECM/blob/master/LICENSE">MIT License</a><br>
+  <a href="https://github.com/Linch-Lab/DRTxECM">GitHub</a> ·
+  <a href="download.html">下載</a> ·
+  <a href="method.html">方法與原理</a> ·
+  <a href="cite.html">引用與致謝</a> ·
+  <a href="https://github.com/Linch-Lab/DRTxECM/issues">問題回報</a><br>
+  本頁為靜態網頁，不使用 JavaScript、不收集任何資料。
+</footer>
+
+</body>
+</html>

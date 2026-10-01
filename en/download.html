@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Download - DRTxECM</title>
+<meta name="description" content="Download DRTxECM v0.2.0: portable ZIP for Windows 64-bit, with SHA256 verification, system requirements and instructions for running from source.">
+<link rel="canonical" href="https://drtxecm.billlinch.com/en/download.html">
+<link rel="alternate" hreflang="en" href="https://drtxecm.billlinch.com/en/download.html">
+<link rel="alternate" hreflang="zh-Hant" href="https://drtxecm.billlinch.com/download.html">
+<link rel="alternate" hreflang="x-default" href="https://drtxecm.billlinch.com/download.html">
+<link rel="icon" href="../assets/app.ico">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://drtxecm.billlinch.com/en/download.html">
+<meta property="og:title" content="Download - DRTxECM">
+<meta property="og:description" content="Portable ZIP for Windows 64-bit. Unzip and run, no Python installation required.">
+<meta property="og:image" content="https://drtxecm.billlinch.com/assets/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<header class="site">
+  <p class="brand"><a href="index.html"><img src="../assets/logo.svg" alt="DRTxECM" height="30"></a></p>
+  <span class="ver">v0.2.0</span>
+  <span class="spacer"></span>
+  <span class="lang"><a href="../download.html">繁體中文</a></span>
+</header>
+
+<nav class="site">
+  <a href="index.html">Home</a>
+  <a class="here" href="download.html">Download</a>
+  <a href="guide.html">Guide</a>
+  <a href="method.html">Method</a>
+  <a href="faq.html">FAQ</a>
+  <a href="cite.html">Citation &amp; Credits</a>
+</nav>
+
+<h1>Download</h1>
+<p class="lead">Current version <b>v0.2.0</b> ｜ Windows 10 / 11 (64-bit)</p>
+
+<div class="dl">
+  <a class="big" href="https://github.com/Linch-Lab/DRTxECM/releases/latest/download/DRTxECM-win64.zip">Download DRTxECM-win64.zip</a>
+  <div class="meta">
+    Portable ｜ Unzip and run ｜ No Python installation required<br>
+    About <b>122&nbsp;MB</b> to download, roughly <b>332&nbsp;MB</b> once extracted (about 1,360 files)<br>
+    Clicking the button starts the download immediately; if your browser does nothing, see <a href="#trouble">download troubleshooting</a> below
+  </div>
+</div>
+
+<h2>Files</h2>
+
+<table>
+  <tr>
+    <th style="width:34%">File</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><b>DRTxECM-win64.zip</b></td>
+    <td>The main application. Unzip it and run <code>DRTxECM.exe</code>; no installation is needed.</td>
+  </tr>
+  <tr>
+    <td><b>SHA256SUMS.txt</b></td>
+    <td>File hashes, so you can verify that the download has not been tampered with.
+      <a href="https://github.com/Linch-Lab/DRTxECM/releases/latest">Get it from the Releases page</a></td>
+  </tr>
+  <tr>
+    <td><b>Source code</b></td>
+    <td>The Python project (PyQt5), which you can inspect or build yourself:
+      <a href="https://github.com/Linch-Lab/DRTxECM">GitHub</a></td>
+  </tr>
+  <tr>
+    <td><b>Example data</b></td>
+    <td>EIS examples and tutorial notebooks included in the repository:
+      <a href="https://github.com/Linch-Lab/DRTxECM/tree/master/tutorial">tutorial/</a>,
+      <a href="https://github.com/Linch-Lab/DRTxECM/tree/master/EIS%20data">EIS data/</a></td>
+  </tr>
+  <tr>
+    <td><b>User manual</b></td>
+    <td>The original pyDRTtools manual (PDF):
+      <a href="https://github.com/Linch-Lab/DRTxECM/blob/master/manual/pyDRTtools_manual.pdf">pyDRTtools_manual.pdf</a></td>
+  </tr>
+  <tr>
+    <td><b>All versions</b></td>
+    <td><a href="https://github.com/Linch-Lab/DRTxECM/releases">Release list</a> (with changelogs)</td>
+  </tr>
+</table>
+
+<h2 id="verify">Verify the download (optional)</h2>
+
+<p>In Command Prompt, run:</p>
+<pre>certutil -hashfile DRTxECM-win64.zip SHA256</pre>
+<p>Compare the output with the contents of <code>SHA256SUMS.txt</code>; if they match, the file is intact and unmodified.</p>
+
+<h2>System requirements</h2>
+
+<table>
+  <tr><th style="width:34%">Item</th><th>Requirement</th></tr>
+  <tr><td>Operating system</td><td>Windows 10 / 11 (64-bit)</td></tr>
+  <tr><td>Python</td><td><b>Not required</b> (already bundled)</td></tr>
+  <tr><td>Network</td><td><b>Not required</b>. All computation runs locally and data is never uploaded</td></tr>
+  <tr><td>Memory</td><td>8&nbsp;GB or more recommended (DRT regularization and CNLS fitting build large matrices)</td></tr>
+  <tr><td>Disk space</td><td>About 332&nbsp;MB once extracted (about 122&nbsp;MB to download)</td></tr>
+  <tr><td>Display</td><td>A desktop environment is required (PyQt5 graphical interface)</td></tr>
+</table>
+
+<h2>Installation</h2>
+
+<ol>
+  <li>Unzip <code>DRTxECM-win64.zip</code> into any folder (for example <code>C:\Tools\DRTxECM</code>)</li>
+  <li>Run <code>DRTxECM.exe</code></li>
+  <li>The first launch has to unpack and load the libraries, so it is slower than later ones (a few seconds to a dozen or so seconds)</li>
+  <li>Import your EIS data and you are ready to start; the workflow is described in the <a href="guide.html">Guide</a></li>
+</ol>
+
+<p class="note">
+Please <b>unzip the archive completely before running</b>, and do not double-click the executable from inside the ZIP file.
+Windows' "compressed folder" view prevents the program from correctly reading the libraries stored in the same folder.
+</p>
+
+<h2>Running from source (macOS / Linux)</h2>
+
+<p>
+The packaged portable build is currently available for Windows only. macOS and Linux users can run the program from source,
+which requires Python 3.10 and a few scientific computing packages:
+</p>
+
+<pre>git clone https://github.com/Linch-Lab/DRTxECM.git
+cd DRTxECM
+pip install numpy scipy pandas matplotlib scikit-learn cvxopt PyQt5 click
+python launch.py</pre>
+
+<p>
+For complete instructions (including how to download a ZIP instead if you do not have git), see
+<a href="https://github.com/Linch-Lab/DRTxECM/blob/master/INSTALL.md">INSTALL.md</a>.
+</p>
+
+<h2 id="trouble">Download troubleshooting</h2>
+
+<h3>The button did not start a download?</h3>
+<p>
+The button links to the file on GitHub Releases. If your network environment blocks GitHub,
+you can use the <a href="https://github.com/Linch-Lab/DRTxECM/releases">Releases page</a> to pick the file manually,
+or use a proxy.
+</p>
+
+<h3>Windows shows "Unknown publisher" or a SmartScreen warning?</h3>
+<p>
+Because this project has not purchased a code-signing certificate. That is <b>common to all free
+open-source software</b> and does not mean it is a virus.
+You can click "More info" → "Run anyway"; or <b>build it yourself from source</b>,
+so that you can be sure the executable matches the code. You can also verify the download with the SHA256 procedure above.
+</p>
+
+<h3>Antivirus software reports a false positive?</h3>
+<p>
+Executables packaged with PyInstaller are occasionally misidentified. This project's build pipeline deliberately disables
+UPX compression (UPX markedly increases false-positive rates). You can verify the SHA256 first, or build from source yourself.
+</p>
+
+<h3>After unzipping, running it reports "xxx.dll not found"?</h3>
+<p>
+This usually means it was run without being fully unzipped, or that the extraction was interrupted. Please delete the whole folder and unzip it again.
+</p>
+
+<footer class="site">
+  DRTxECM — open-source DRT-to-equivalent-circuit modeling ·
+  <a href="https://github.com/Linch-Lab/DRTxECM/blob/master/LICENSE">MIT License</a><br>
+  <a href="https://github.com/Linch-Lab/DRTxECM">GitHub</a> ·
+  <a href="download.html">Download</a> ·
+  <a href="method.html">Method</a> ·
+  <a href="cite.html">Citation &amp; Credits</a> ·
+  <a href="https://github.com/Linch-Lab/DRTxECM/issues">Report an issue</a><br>
+  This is a static page: no JavaScript, no data collection.
+</footer>
+
+</body>
+</html>

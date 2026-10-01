@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DRTxECM - An Open-Source Integrated Tool from DRT to Equivalent-Circuit Modeling</title>
+<meta name="description" content="DRTxECM extends pyDRTtools: it links EIS analysis into a single workflow — DRT deconvolution, Gaussian peak decomposition and equivalent-circuit CNLS fitting, with the CPE phase angle &alpha; as a free fitting parameter. Open source, free, and fully offline.">
+<link rel="canonical" href="https://drtxecm.billlinch.com/en/">
+<link rel="alternate" hreflang="en" href="https://drtxecm.billlinch.com/en/">
+<link rel="alternate" hreflang="zh-Hant" href="https://drtxecm.billlinch.com/">
+<link rel="alternate" hreflang="x-default" href="https://drtxecm.billlinch.com/">
+<link rel="icon" href="../assets/app.ico">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://drtxecm.billlinch.com/en/">
+<meta property="og:title" content="DRTxECM - An Open-Source Integrated Tool from DRT to Equivalent-Circuit Modeling">
+<meta property="og:description" content="DRT deconvolution → Gaussian peak decomposition → equivalent-circuit CNLS fitting. The first open-source tool to connect DRT analysis with ECM parameter estimation, with the CPE phase angle &alpha; freely fitted.">
+<meta property="og:image" content="https://drtxecm.billlinch.com/assets/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<header class="site">
+  <p class="brand"><a href="index.html"><img src="../assets/logo.svg" alt="DRTxECM" height="30"></a></p>
+  <span class="ver">v0.2.0</span>
+  <span class="spacer"></span>
+  <span class="lang"><a href="../index.html">繁體中文</a></span>
+</header>
+
+<nav class="site">
+  <a class="here" href="index.html">Home</a>
+  <a href="download.html">Download</a>
+  <a href="guide.html">Guide</a>
+  <a href="method.html">Method</a>
+  <a href="faq.html">FAQ</a>
+  <a href="cite.html">Citation &amp; Credits</a>
+</nav>
+
+<h1>Turning DRT curves into equivalent circuits you can read</h1>
+<p class="lead">
+DRTxECM is an extension of <a href="https://github.com/ciuccislab/pyDRTtools">pyDRTtools</a>.
+It links the three stages of electrochemical impedance spectroscopy (EIS) analysis into a single workflow:
+<b>DRT deconvolution → Gaussian peak decomposition → equivalent-circuit CNLS fitting</b>.
+It is the first open-source tool to connect DRT analysis with equivalent-circuit (ECM) parameter estimation,
+and it makes the <b>CPE phase angle &alpha; a freely fitted parameter</b>.
+</p>
+
+<div class="dl">
+  <a class="big" href="https://github.com/Linch-Lab/DRTxECM/releases/latest/download/DRTxECM-win64.zip">Download DRTxECM (Windows 64-bit)</a>
+  <div class="meta">
+    Portable ZIP ｜ Unzip and run, no Python installation required<br>
+    <a href="download.html">Other download options &amp; file verification</a> ·
+    <a href="guide.html">Guide</a> ·
+    <a href="method.html">Method</a>
+  </div>
+</div>
+
+<div class="badges">
+  <span class="badge">MIT open source</span>
+  <span class="badge">Fully offline computation</span>
+  <span class="badge">No Python required</span>
+  <span class="badge">Runs from source on Windows / macOS / Linux</span>
+</div>
+
+<figure class="shot">
+  <a href="../assets/screenshots/02-drt-result.png"><img src="../assets/screenshots/02-drt-result.png" alt="The DRTxECM main window: DRT settings and run buttons on the left, the DRT result gamma(tau) for the ZARC sample data on the right" width="1500" height="950"></a>
+  <figcaption>
+    The actual interface. Running the DRT on the bundled ZARC sample data
+    (81 points, 0.01&nbsp;Hz to 1&nbsp;MHz) yields a single relaxation peak in &gamma;(&tau;),
+    with the regularization parameter selected automatically by GCV.
+    Click the image for full size.
+  </figcaption>
+</figure>
+
+<h2>Three-stage workflow</h2>
+
+<div class="pipe">
+  <div class="step"><b>① Import &amp; clean</b><span>CSV / TXT, with instrument headers optionally skipped; click on the Nyquist plot to remove noise points; PCHIP interpolation onto a uniform logarithmic frequency grid</span></div>
+  <div class="arw">&rarr;</div>
+  <div class="step"><b>② DRT → R//CPE</b><span>Multi-Gaussian peak fitting of the DRT &gamma;(&tau;), converted automatically into R, C and f<sub>c</sub> for each peak, and sent to Stage 3 in one click</span></div>
+  <div class="arw">&rarr;</div>
+  <div class="step"><b>③ ECM fitting</b><span>ZView-style parameter table; LR<sub>0</sub> + &Sigma;(R<sub>i</sub>//CPE<sub>i</sub>) circuit; L-BFGS-B bounded optimization; live Nyquist and Bode previews</span></div>
+</div>
+
+<table>
+  <tr><th style="width:22%">Stage</th><th style="width:26%">Module</th><th>What it does</th></tr>
+  <tr>
+    <td><b>1. Import &amp; clean</b></td>
+    <td><code>DataImportPreprocessor</code><br><code>DataCleaningWindow</code></td>
+    <td>Flexible CSV / TXT import (rows can be skipped); interactive click-to-remove of noise on the Nyquist plot; PCHIP interpolation onto a uniform logarithmic frequency grid.</td>
+  </tr>
+  <tr>
+    <td><b>2. DRT &rarr; R//CPE</b></td>
+    <td>Gaussian peak decomposition<br><code>Stage2Window</code></td>
+    <td>Multi-Gaussian fitting of the DRT &gamma;(&tau;); automatic conversion into RC initial parameters (R, C and f<sub>c</sub> for each peak); one-click export to Stage 3, starting from R//CPE (initial &alpha; = 1.0).</td>
+  </tr>
+  <tr>
+    <td><b>3. ECM fitting</b></td>
+    <td>CNLS optimization<br><code>Stage3Window</code></td>
+    <td>ZView-style parameter table; LR<sub>0</sub> + &Sigma;(R<sub>i</sub>//CPE<sub>i</sub>) circuit model; L-BFGS-B bounded optimization; live Nyquist and Bode previews; branch-resolved visualization.</td>
+  </tr>
+</table>
+
+<figure class="shot">
+  <a href="../assets/screenshots/03-stage2-peaks.png"><img src="../assets/screenshots/03-stage2-peaks.png" alt="Stage 2: decomposing the DRT gamma(tau) into three Gaussian peaks" width="1250" height="800"></a>
+  <figcaption>
+    <b>Stage 2</b>: decomposing &gamma;(&tau;) into three Gaussian peaks. The black dots are the
+    raw DRT data, the red line is the sum of the three peaks, and the blue / orange / green
+    dashed curves are the individual peak contributions. Each peak's amplitude, position and
+    width can be locked or released independently.
+  </figcaption>
+</figure>
+
+<figure class="shot">
+  <a href="../assets/screenshots/04-stage3-ecm.png"><img src="../assets/screenshots/04-stage3-ecm.png" alt="Stage 3: equivalent circuit parameter table, plus branch-resolved Nyquist and Bode plots" width="1500" height="900"></a>
+  <figcaption>
+    <b>Stage 3</b>: R, Q and &alpha; for every branch together with the estimated standard errors
+    (Error / Error%), while the Nyquist plot draws each R//CPE branch contribution in a distinct colour.
+    This example deliberately fits a single ZARC semicircle with three branches
+    (over-parameterization), so the standard errors are large &mdash; which is exactly what the
+    <code>Error%</code> column is for: telling you whether a parameter is actually constrained by the data.
+  </figcaption>
+</figure>
+
+<h2>Key features</h2>
+
+<div class="cards">
+  <div class="card"><b>CPE phase angle &alpha; freely fitted</b><span>Commercial tools often fix &alpha; or restrict it to particular values; DRTxECM optimizes &alpha; together with R and Q, bounded by 0.2 &le; &alpha; &le; 1.05</span></div>
+  <div class="card"><b>DRT-informed initial guess</b><span>The Gaussian peak parameters are converted directly into physically meaningful starting values, avoiding the convergence problems of random initialization</span></div>
+  <div class="card"><b>Branch-resolved visualization</b><span>Each R//CPE branch is drawn in a different colour on the Nyquist plot, so their individual semicircle contributions are visible</span></div>
+  <div class="card"><b>Interactive data cleaning</b><span>Click noise points away directly on the plot — no need to go back and edit the raw file</span></div>
+  <div class="card"><b>Four DRT algorithms</b><span>Tikhonov (ridge regression), Bayesian, BHT and GP-DRT, all retained from pyDRTtools</span></div>
+  <div class="card"><b>Eight discretization bases</b><span>Gaussian, C2/C4/C6 Matern, Inverse Quadratic, Inverse Quadric, Cauchy, PWL</span></div>
+  <div class="card"><b>Seven regularization selection methods</b><span>custom, GCV, mGCV, rGCV, LC, kf, re-im</span></div>
+  <div class="card"><b>Parameter uncertainty</b><span>Covariance estimated from the inverse Hessian matrix, reporting the standard error of every fitted parameter</span></div>
+  <div class="card"><b>100% backward compatible</b><span>The original pyDRTtools DRT computation is completely unmodified</span></div>
+  <div class="card"><b>Fully offline</b><span>All computation runs on your own computer; data is never uploaded anywhere</span></div>
+  <div class="card"><b>Lockable parameter modes</b><span>Every R, Q and &alpha; can be set to fixed, &plusmn;5%, &plusmn;10% or free, to simulate the tolerances of real measurements</span></div>
+  <div class="card"><b>MIT open source</b><span>Audit it, modify it and build it yourself, commercial use included</span></div>
+</div>
+
+<h2>Quick start</h2>
+
+<ol>
+  <li><a href="download.html">Download</a> and unzip <code>DRTxECM-win64.zip</code></li>
+  <li>Run <code>DRTxECM.exe</code></li>
+  <li>Import EIS data (CSV or TXT; instrument headers can be skipped)</li>
+  <li>Run the DRT (Tikhonov / Bayesian / BHT, whichever you prefer) to obtain &gamma;(&tau;)</li>
+  <li>Click <b>Launch Stage 2</b> to perform Gaussian peak decomposition on &gamma;(&tau;)</li>
+  <li>Click <b>Export to Stage 3</b>, adjust R, Q and &alpha;, then run the CNLS fit</li>
+  <li>Export the fitted parameters, the Nyquist and Bode plots, and the contribution of each branch</li>
+</ol>
+
+<p>For fuller operating and interface instructions, see the <a href="guide.html">Guide</a>.</p>
+
+<h2>Relationship to pyDRTtools</h2>
+
+<p>
+DRTxECM is <b>not</b> a separate tool rewritten from scratch; it is an extension built on top of
+<a href="https://github.com/ciuccislab/pyDRTtools">pyDRTtools</a> (Ciucci Lab).
+In the source code, the DRT computations in <code>pyDRTtools/</code> (Tikhonov regularization, Bayesian, BHT, GP-DRT)
+are fully retained and unmodified; the additions live in <code>extensions.py</code> and in the Stage 2 and Stage 3 interfaces.
+This means that the results you obtain at the DRT stage are consistent with using pyDRTtools directly.
+</p>
+
+<p class="note">
+If you use DRT computation results in a paper, <b>you must cite the original pyDRTtools publications</b>.
+The list is compiled under <a href="cite.html">Citation &amp; Credits</a>.
+</p>
+
+<h2>License &amp; source</h2>
+
+<ul>
+  <li>License: <a href="https://github.com/Linch-Lab/DRTxECM/blob/master/LICENSE">MIT License</a> (DRTxECM extensions &copy; Linch-Lab; original pyDRTtools &copy; Ciucci Lab)</li>
+  <li>Source: <a href="https://github.com/Linch-Lab/DRTxECM">github.com/Linch-Lab/DRTxECM</a></li>
+  <li>Installation instructions: <a href="https://github.com/Linch-Lab/DRTxECM/blob/master/INSTALL.md">INSTALL.md</a></li>
+  <li>pyDRTtools manual: <a href="https://github.com/Linch-Lab/DRTxECM/blob/master/manual/pyDRTtools_manual.pdf">pyDRTtools_manual.pdf</a></li>
+  <li>Bug reports: <a href="https://github.com/Linch-Lab/DRTxECM/issues">GitHub Issues</a></li>
+</ul>
+
+<footer class="site">
+  DRTxECM — open-source DRT-to-equivalent-circuit modeling ·
+  <a href="https://github.com/Linch-Lab/DRTxECM/blob/master/LICENSE">MIT License</a><br>
+  <a href="https://github.com/Linch-Lab/DRTxECM">GitHub</a> ·
+  <a href="download.html">Download</a> ·
+  <a href="method.html">Method</a> ·
+  <a href="cite.html">Citation &amp; Credits</a> ·
+  <a href="https://github.com/Linch-Lab/DRTxECM/issues">Report an issue</a><br>
+  This is a static page: no JavaScript, no data collection.
+</footer>
+
+</body>
+</html>

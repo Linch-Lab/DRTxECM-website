@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DRTxECM - 從 DRT 到等效電路模型的開源整合工具</title>
+<meta name="description" content="DRTxECM 是 pyDRTtools 的擴充：把 EIS 分析串成一條流程 —— DRT 解卷積、高斯峰分解、等效電路 CNLS 擬合，並讓 CPE 相角 α 成為自由擬合參數。開源免費、可離線使用。">
+<link rel="canonical" href="https://drtxecm.billlinch.com/">
+<link rel="alternate" hreflang="zh-Hant" href="https://drtxecm.billlinch.com/">
+<link rel="alternate" hreflang="en" href="https://drtxecm.billlinch.com/en/">
+<link rel="alternate" hreflang="x-default" href="https://drtxecm.billlinch.com/">
+<link rel="icon" href="assets/app.ico">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://drtxecm.billlinch.com/">
+<meta property="og:title" content="DRTxECM - 從 DRT 到等效電路模型的開源整合工具">
+<meta property="og:description" content="DRT 解卷積 → 高斯峰分解 → 等效電路 CNLS 擬合。第一個把 DRT 分析與 ECM 參數估計接起來的開源工具，CPE 相角 α 可自由擬合。">
+<meta property="og:image" content="https://drtxecm.billlinch.com/assets/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="site">
+  <p class="brand"><a href="index.html"><img src="assets/logo.svg" alt="DRTxECM" height="30"></a></p>
+  <span class="ver">v0.2.0</span>
+  <span class="spacer"></span>
+  <span class="lang"><a href="en/index.html">English</a></span>
+</header>
+
+<nav class="site">
+  <a class="here" href="index.html">首頁</a>
+  <a href="download.html">下載</a>
+  <a href="guide.html">使用說明</a>
+  <a href="method.html">方法與原理</a>
+  <a href="faq.html">常見問題</a>
+  <a href="cite.html">引用與致謝</a>
+</nav>
+
+<h1>把 DRT 的曲線，變成看得懂的等效電路</h1>
+<p class="lead">
+DRTxECM 是 <a href="https://github.com/ciuccislab/pyDRTtools">pyDRTtools</a> 的擴充。
+它把電化學阻抗頻譜（EIS）分析的三個階段接成一條流程：
+<b>DRT 解卷積 → 高斯峰分解 → 等效電路 CNLS 擬合</b>。
+這是第一個把 DRT 分析與等效電路（ECM）參數估計接起來的開源工具，
+並且讓 <b>CPE 相角 α 成為可自由擬合的參數</b>。
+</p>
+
+<div class="dl">
+  <a class="big" href="https://github.com/Linch-Lab/DRTxECM/releases/latest/download/DRTxECM-win64.zip">下載 DRTxECM（Windows 64 位元）</a>
+  <div class="meta">
+    免安裝 ZIP ｜ 解壓即用，不需安裝 Python<br>
+    <a href="download.html">其他下載選項與檔案驗證</a> ·
+    <a href="guide.html">使用說明</a> ·
+    <a href="method.html">方法與原理</a>
+  </div>
+</div>
+
+<div class="badges">
+  <span class="badge">MIT 開源</span>
+  <span class="badge">完全離線運算</span>
+  <span class="badge">不需 Python</span>
+  <span class="badge">Windows / macOS / Linux 可從原始碼執行</span>
+</div>
+
+<figure class="shot">
+  <a href="assets/screenshots/02-drt-result.png"><img src="assets/screenshots/02-drt-result.png" alt="DRTxECM 主視窗：左側是 DRT 的設定與執行按鈕，右側是 ZARC 範例資料的 DRT 結果 γ(τ)" width="1500" height="950"></a>
+  <figcaption>
+    實際介面。以內附的 ZARC 範例資料（81 點、0.01&nbsp;Hz 到 1&nbsp;MHz）執行 DRT 後，
+    得到 γ(τ) 的單一鬆弛峰，並自動以 GCV 選出正則化參數。點圖可看原始尺寸。
+  </figcaption>
+</figure>
+
+<h2>三階段流程</h2>
+
+<div class="pipe">
+  <div class="step"><b>① 匯入與清理</b><span>CSV / TXT，可跳過儀器表頭；在 Nyquist 圖上點擊移除雜訊點；PCHIP 內插成均勻對數頻率格點</span></div>
+  <div class="arw">&rarr;</div>
+  <div class="step"><b>② DRT → R//CPE</b><span>對 DRT 的 γ(τ) 做多高斯峰擬合，自動換算成每個峰的 R、C、f<sub>c</sub>，一鍵送到第三階段</span></div>
+  <div class="arw">&rarr;</div>
+  <div class="step"><b>③ ECM 擬合</b><span>ZView 風格參數表；LR<sub>0</sub> + &Sigma;(R<sub>i</sub>//CPE<sub>i</sub>) 電路；L-BFGS-B 有界優化；即時 Nyquist 與 Bode 預覽</span></div>
+</div>
+
+<table>
+  <tr><th style="width:22%">階段</th><th style="width:26%">模組</th><th>做什麼</th></tr>
+  <tr>
+    <td><b>1. 匯入與清理</b></td>
+    <td><code>DataImportPreprocessor</code><br><code>DataCleaningWindow</code></td>
+    <td>彈性的 CSV / TXT 匯入（可跳過列）；在 Nyquist 圖上互動點擊移除雜訊；以 PCHIP 內插得到均勻的對數頻率格點。</td>
+  </tr>
+  <tr>
+    <td><b>2. DRT &rarr; R//CPE</b></td>
+    <td>高斯峰分解<br><code>Stage2Window</code></td>
+    <td>對 DRT 的 γ(τ) 做多高斯擬合；自動換算成 RC 初始參數（每個峰的 R、C、f<sub>c</sub>）；一鍵匯出到第三階段，並以 R//CPE 起始（初始 α = 1.0）。</td>
+  </tr>
+  <tr>
+    <td><b>3. ECM 擬合</b></td>
+    <td>CNLS 優化<br><code>Stage3Window</code></td>
+    <td>ZView 風格參數表；LR<sub>0</sub> + &Sigma;(R<sub>i</sub>//CPE<sub>i</sub>) 電路模型；L-BFGS-B 有界優化；即時 Nyquist 與 Bode 預覽；分支解析視覺化。</td>
+  </tr>
+</table>
+
+<figure class="shot">
+  <a href="assets/screenshots/03-stage2-peaks.png"><img src="assets/screenshots/03-stage2-peaks.png" alt="Stage 2：把 DRT 的 γ(τ) 分解成三個高斯峰" width="1250" height="800"></a>
+  <figcaption>
+    <b>第二階段</b>：把 γ(τ) 拆成三個高斯峰。黑點是 DRT 原始資料、紅線是三峰總和，
+    藍／橘／綠虛線是個別峰的貢獻。每個峰的振幅、位置、寬度都可以手動鎖定或放開。
+  </figcaption>
+</figure>
+
+<figure class="shot">
+  <a href="assets/screenshots/04-stage3-ecm.png"><img src="assets/screenshots/04-stage3-ecm.png" alt="Stage 3：等效電路參數表，以及分支解析的 Nyquist 與 Bode 圖" width="1500" height="900"></a>
+  <figcaption>
+    <b>第三階段</b>：每個分支的 R、Q、α 與估計標準誤（Error／Error%），
+    Nyquist 圖以不同顏色畫出各 R//CPE 分支的貢獻。
+    這個範例刻意用三個分支去擬合單一 ZARC 半圓（過度參數化），
+    因此標準誤很大 —— 這正好示範 <code>Error%</code> 欄位的用途：
+    它會告訴你這組參數有沒有被資料約束住。
+  </figcaption>
+</figure>
+
+<h2>核心特色</h2>
+
+<div class="cards">
+  <div class="card"><b>CPE 相角 α 自由擬合</b><span>商業工具常把 α 固定或限制在特定值；DRTxECM 讓 α 與 R、Q 一起被優化，邊界 0.2 &le; α &le; 1.05</span></div>
+  <div class="card"><b>DRT 啟發的初始猜測</b><span>高斯峰的參數直接換算成物理上有意義的起始值，避免隨機初始化的收斂問題</span></div>
+  <div class="card"><b>分支解析視覺化</b><span>每個 R//CPE 分支在 Nyquist 圖上用不同顏色畫出，看得出各自的半圓貢獻</span></div>
+  <div class="card"><b>互動式資料清理</b><span>在圖上直接點掉雜訊點，不必回去改原始檔</span></div>
+  <div class="card"><b>四種 DRT 演算法</b><span>Tikhonov（脊回歸）、Bayesian、BHT、GP-DRT，全部保留自 pyDRTtools</span></div>
+  <div class="card"><b>八種離散化基底</b><span>Gaussian、C2/C4/C6 Matern、Inverse Quadratic、Inverse Quadric、Cauchy、PWL</span></div>
+  <div class="card"><b>七種正則化選擇法</b><span>custom、GCV、mGCV、rGCV、LC、kf、re-im</span></div>
+  <div class="card"><b>參數不確定度</b><span>由反 Hessian 矩陣估計共變異數，輸出每個擬合參數的標準誤</span></div>
+  <div class="card"><b>100% 向下相容</b><span>pyDRTtools 原本的 DRT 計算完全未經修改</span></div>
+  <div class="card"><b>完全離線</b><span>所有運算都在你的電腦上，資料不會上傳到任何地方</span></div>
+  <div class="card"><b>參數模式可鎖定</b><span>每個 R、Q、α 可設為固定、±5%、±10% 或自由，模擬真實量測的容差</span></div>
+  <div class="card"><b>開源 MIT</b><span>可自行稽核、修改與自行建置，包含商業用途</span></div>
+</div>
+
+<h2>快速開始</h2>
+
+<ol>
+  <li><a href="download.html">下載</a>並解壓 <code>DRTxECM-win64.zip</code></li>
+  <li>執行 <code>DRTxECM.exe</code></li>
+  <li>匯入 EIS 資料（CSV 或 TXT，可跳過儀器表頭）</li>
+  <li>跑 DRT（Tikhonov / Bayesian / BHT 任選），得到 γ(τ)</li>
+  <li>按 <b>Launch Stage 2</b>，對 γ(τ) 做高斯峰分解</li>
+  <li>按 <b>Export to Stage 3</b>，調整 R、Q、α 後執行 CNLS 擬合</li>
+  <li>匯出擬合參數、Nyquist 與 Bode 圖，以及各分支的貢獻</li>
+</ol>
+
+<p>更完整的操作與介面說明，請看 <a href="guide.html">使用說明</a>。</p>
+
+<h2>與 pyDRTtools 的關係</h2>
+
+<p>
+DRTxECM <b>不是</b> 從頭改寫的另一套工具，而是站在
+<a href="https://github.com/ciuccislab/pyDRTtools">pyDRTtools</a>（Ciucci Lab）之上的擴充。
+原始碼中 <code>pyDRTtools/</code> 的 DRT 計算（Tikhonov 正則化、Bayesian、BHT、GP-DRT）
+完全保留、未經修改，新增的部分放在 <code>extensions.py</code> 與第二、三階段的介面。
+這代表你在 DRT 階段得到的結果，與直接用 pyDRTtools 是一致的。
+</p>
+
+<p class="note">
+如果你在論文裡使用 DRT 的計算結果，<b>必須引用 pyDRTtools 的原始文獻</b>。
+清單整理在 <a href="cite.html">引用與致謝</a>。
+</p>
+
+<h2>授權與原始碼</h2>
+
+<ul>
+  <li>授權：<a href="https://github.com/Linch-Lab/DRTxECM/blob/master/LICENSE">MIT License</a>（DRTxECM 擴充 &copy; Linch-Lab；原始 pyDRTtools &copy; Ciucci Lab）</li>
+  <li>原始碼：<a href="https://github.com/Linch-Lab/DRTxECM">github.com/Linch-Lab/DRTxECM</a></li>
+  <li>安裝說明：<a href="https://github.com/Linch-Lab/DRTxECM/blob/master/INSTALL.md">INSTALL.md</a></li>
+  <li>pyDRTtools 使用手冊：<a href="https://github.com/Linch-Lab/DRTxECM/blob/master/manual/pyDRTtools_manual.pdf">pyDRTtools_manual.pdf</a></li>
+  <li>問題回報：<a href="https://github.com/Linch-Lab/DRTxECM/issues">GitHub Issues</a></li>
+</ul>
+
+<footer class="site">
+  DRTxECM — DRT 與等效電路建模的開源整合工具 ·
+  <a href="https://github.com/Linch-Lab/DRTxECM/blob/master/LICENSE">MIT License</a><br>
+  <a href="https://github.com/Linch-Lab/DRTxECM">GitHub</a> ·
+  <a href="download.html">下載</a> ·
+  <a href="method.html">方法與原理</a> ·
+  <a href="cite.html">引用與致謝</a> ·
+  <a href="https://github.com/Linch-Lab/DRTxECM/issues">問題回報</a><br>
+  本頁為靜態網頁，不使用 JavaScript、不收集任何資料。
+</footer>
+
+</body>
+</html>

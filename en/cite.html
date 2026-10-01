@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Citation &amp; Credits - DRTxECM</title>
+<meta name="description" content="How to cite DRTxECM, the list of original pyDRTtools references that must be cited (with DOIs), license information and acknowledgements.">
+<link rel="canonical" href="https://drtxecm.billlinch.com/en/cite.html">
+<link rel="alternate" hreflang="en" href="https://drtxecm.billlinch.com/en/cite.html">
+<link rel="alternate" hreflang="zh-Hant" href="https://drtxecm.billlinch.com/cite.html">
+<link rel="alternate" hreflang="x-default" href="https://drtxecm.billlinch.com/cite.html">
+<link rel="icon" href="../assets/app.ico">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://drtxecm.billlinch.com/en/cite.html">
+<meta property="og:title" content="Citation &amp; Credits - DRTxECM">
+<meta property="og:description" content="How to cite DRTxECM, the list of original pyDRTtools references that must be cited (with DOIs), license information and acknowledgements.">
+<meta property="og:image" content="https://drtxecm.billlinch.com/assets/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<header class="site">
+  <p class="brand"><a href="index.html"><img src="../assets/logo.svg" alt="DRTxECM" height="30"></a></p>
+  <span class="ver">v0.2.0</span>
+  <span class="spacer"></span>
+  <span class="lang"><a href="../cite.html">繁體中文</a></span>
+</header>
+
+<nav class="site">
+  <a href="index.html">Home</a>
+  <a href="download.html">Download</a>
+  <a href="guide.html">Guide</a>
+  <a href="method.html">Method</a>
+  <a href="faq.html">FAQ</a>
+  <a class="here" href="cite.html">Citation &amp; Credits</a>
+</nav>
+
+<h1>Citation &amp; Credits</h1>
+<p class="lead">
+DRTxECM is built on top of pyDRTtools. <b>The DRT computation results are the work of pyDRTtools</b>,
+so you must cite the corresponding original references when you use them. This page sets out clearly
+what to cite, and when.
+</p>
+
+<h2>Citing DRTxECM itself</h2>
+
+<p>
+DRTxECM <b>does not yet have a formally published paper</b>. If you need to credit the tool you have
+used, you can cite the software repository itself:
+</p>
+
+<pre>@software{DRTxECM,
+  title        = {DRTxECM: A pyDRTtools Extension for CPE
+                  Phase-Angle-Aware Equivalent Circuit Modeling},
+  author       = {{Linch-Lab}},
+  year         = {2026},
+  version      = {0.2.0},
+  url          = {https://github.com/Linch-Lab/DRTxECM},
+  license      = {MIT},
+  note         = {Three-stage pipeline: DRT deconvolution,
+                  Gaussian peak decomposition,
+                  CNLS equivalent circuit fitting}
+}</pre>
+
+<p class="note">
+If a paper is published in the future, this page will be updated. You can also simply cite the
+<a href="https://github.com/Linch-Lab/DRTxECM">GitHub repository</a> URL.
+</p>
+
+<h2>References that must be cited when using DRT computation results</h2>
+
+<p>
+The DRT core of DRTxECM is pyDRTtools. The list below matches the official requirements of pyDRTtools,
+and the numbering follows the DRTxECM README.
+</p>
+
+<h3>1. Foundational theory and discretization method (<b>must cite</b>)</h3>
+<p>
+Whenever you use DRT computation results, you should cite this paper. It is the foundation of the RBF
+discretization and of DRTtools.
+</p>
+<p>
+Wan, T. H., Saccoccio, M., Chen, C., &amp; Ciucci, F. (2015).
+<i>Influence of the discretization methods on the distribution of relaxation times
+deconvolution: implementing radial basis functions with DRTtools.</i>
+Electrochimica Acta, 184, 483&ndash;499.
+<a href="https://doi.org/10.1016/j.electacta.2015.09.097">doi:10.1016/j.electacta.2015.09.097</a>
+</p>
+
+<h3>2. Choice of the regularization parameter</h3>
+<p>
+If you use the automatic λ-selection methods <code>GCV</code>, <code>mGCV</code>, <code>rGCV</code>,
+<code>LC</code>, <code>kf</code> or <code>re-im</code>, please cite this one as well.
+</p>
+<p>
+Maradesa, A., Py, B., Wan, T. H., Effat, M. B., &amp; Ciucci, F. (2023).
+<i>Selecting the Regularization Parameter in the Distribution of Relaxation Times.</i>
+Journal of The Electrochemical Society, 170, 030502.
+<a href="https://doi.org/10.1149/1945-7111/acbca4">doi:10.1149/1945-7111/acbca4</a>
+</p>
+
+<h3>3&ndash;4. Bayesian methods and credible intervals</h3>
+<p>
+If you use <b>Bayesian Run</b>, or present Bayesian credible intervals in a paper, please cite these
+two.
+</p>
+<p>
+Ciucci, F., &amp; Chen, C. (2015).
+<i>Analysis of electrochemical impedance spectroscopy data using the distribution of
+relaxation times: A Bayesian and hierarchical Bayesian approach.</i>
+Electrochimica Acta, 167, 439&ndash;454.
+<a href="https://doi.org/10.1016/j.electacta.2015.03.123">doi:10.1016/j.electacta.2015.03.123</a>
+</p>
+<p>
+Effat, M. B., &amp; Ciucci, F. (2017).
+<i>Bayesian and hierarchical Bayesian based regularization for deconvolving the
+distribution of relaxation times from electrochemical impedance spectroscopy data.</i>
+Electrochimica Acta, 247, 1117&ndash;1129.
+<a href="https://doi.org/10.1016/j.electacta.2017.07.050">doi:10.1016/j.electacta.2017.07.050</a>
+</p>
+
+<h3>5. Hilbert Transform (BHT)</h3>
+<p>
+If you use the <b>Hilbert Transform</b> button (the BHT method) or the EIS Score, please cite this
+paper.
+</p>
+<p>
+Liu, J., Wan, T. H., &amp; Ciucci, F. (2020).
+<i>A Bayesian view on the Hilbert transform and the Kramers-Kronig transform of
+electrochemical impedance data: Probabilistic estimates and quality scores.</i>
+Electrochimica Acta, 357, 136864.
+<a href="https://doi.org/10.1016/j.electacta.2020.136864">doi:10.1016/j.electacta.2020.136864</a>
+</p>
+
+<h2>Further reading (GP-DRT and method reviews)</h2>
+
+<p>
+The <code>fGP.py</code> in the package implements GP-DRT (Gaussian process). If you use it, the
+following references may be consulted:
+</p>
+
+<ul>
+  <li>
+    Liu, J., &amp; Ciucci, F. (2019).
+    <i>The Gaussian process distribution of relaxation times: a machine learning tool
+    for the analysis and prediction of electrochemical impedance spectroscopy data.</i>
+    Electrochimica Acta, 135316.
+    <a href="https://doi.org/10.1016/j.electacta.2019.135316">doi:10.1016/j.electacta.2019.135316</a>
+  </li>
+  <li>
+    Ciucci, F. (2020).
+    <i>The Gaussian process Hilbert transform (GP-HT): Testing the consistency of
+    electrochemical impedance spectroscopy data.</i>
+    Journal of The Electrochemical Society, 167(12), 126503.
+    <a href="https://doi.org/10.1149/1945-7111/aba937">doi:10.1149/1945-7111/aba937</a>
+  </li>
+  <li>
+    Ciucci, F. (2019).
+    <i>Modeling electrochemical impedance spectroscopy.</i>
+    Current Opinion in Electrochemistry, 13, 132&ndash;139.
+    <a href="https://doi.org/10.1016/j.coelec.2018.12.003">doi:10.1016/j.coelec.2018.12.003</a>
+  </li>
+  <li>
+    Saccoccio, M., Wan, T. H., Chen, C., &amp; Ciucci, F. (2014).
+    <i>Optimal regularization in distribution of relaxation times applied to
+    electrochemical impedance spectroscopy: ridge and lasso regression methods &mdash;
+    a theoretical and experimental study.</i>
+    Electrochimica Acta, 147, 470&ndash;482.
+    <a href="https://doi.org/10.1016/j.electacta.2014.09.058">doi:10.1016/j.electacta.2014.09.058</a>
+  </li>
+</ul>
+
+<h2>License</h2>
+
+<p>
+DRTxECM is released under the <a href="https://github.com/Linch-Lab/DRTxECM/blob/master/LICENSE">MIT License</a>.
+</p>
+
+<table>
+  <tr><th style="width:40%">Scope</th><th>Copyright</th></tr>
+  <tr>
+    <td>DRTxECM extensions and modifications<br>(Stages 2 and 3, the data import and cleaning interface)</td>
+    <td>&copy; Linch-Lab</td>
+  </tr>
+  <tr>
+    <td>Original pyDRTtools content<br>(the DRT computation core)</td>
+    <td>&copy; Ciucci Lab (Francesco Ciucci et al.)</td>
+  </tr>
+</table>
+
+<p>
+Specifically, the DRT computation core (<code>basics.py</code>, <code>runs.py</code>,
+<code>BHT.py</code>, <code>HMC.py</code>, <code>fGP.py</code>,
+<code>parameter_selection.py</code>, <code>peak_analysis.py</code>, <code>nearest_PD.py</code>)
+retains the original pyDRTtools implementation; the DRTxECM extensions are in
+<code>extensions.py</code>, and <code>GUI.py</code>, <code>layout.py</code> and <code>cli.py</code>
+have been modified. Both are MIT-licensed, so combining and redistributing them is permitted.
+</p>
+
+<p class="ok">
+The MIT License permits free use, modification and distribution, <b>including commercial use</b>.
+The only substantive condition is to retain the copyright and license notices.
+</p>
+
+<h2>Acknowledgements</h2>
+
+<p>
+The greatest thanks for making this project possible go to <b>Ciucci Lab</b> (The Hong Kong University
+of Science and Technology / University of Bayreuth), who developed and released
+<a href="https://github.com/ciuccislab/pyDRTtools">pyDRTtools</a> under the MIT License, as well as the
+earlier DRTtools. The DRT stage of DRTxECM is entirely their work.
+</p>
+
+<p>
+Thanks are also due to the pyDRTtools user community — the issues reported and the discussions made
+the requirements and boundary conditions of the equivalent-circuit extension clear.
+</p>
+
+<h2>Sponsorship</h2>
+
+<p>
+DRTxECM is completely free and open source, with <b>no ads, no tracking and no paid edition</b>.
+If it has saved you some time, you are welcome to buy the developer a coffee.
+</p>
+
+<table>
+  <tr><th style="width:30%">Method</th><th>Link</th></tr>
+  <tr><td>Ko-fi</td><td><a href="https://ko-fi.com/bill_linch">https://ko-fi.com/bill_linch</a></td></tr>
+</table>
+
+<p>
+<b>What we will not do</b>: lock features behind sponsorship, add ads or tracking, use emotional
+pressure, or let sponsors jump the queue.
+</p>
+
+<footer class="site">
+  DRTxECM — open-source DRT-to-equivalent-circuit modeling ·
+  <a href="https://github.com/Linch-Lab/DRTxECM/blob/master/LICENSE">MIT License</a><br>
+  <a href="https://github.com/Linch-Lab/DRTxECM">GitHub</a> ·
+  <a href="download.html">Download</a> ·
+  <a href="method.html">Method</a> ·
+  <a href="cite.html">Citation &amp; Credits</a> ·
+  <a href="https://github.com/Linch-Lab/DRTxECM/issues">Report an issue</a><br>
+  This is a static page: no JavaScript, no data collection.
+</footer>
+
+</body>
+</html>

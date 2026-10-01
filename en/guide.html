@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guide - DRTxECM</title>
+<meta name="description" content="The DRTxECM workflow: import EIS data, interactively clean noise, run DRT, decompose Gaussian peaks, then fit an equivalent circuit by CNLS and export the results. Includes a reference for the interface fields and buttons.">
+<link rel="canonical" href="https://drtxecm.billlinch.com/en/guide.html">
+<link rel="alternate" hreflang="en" href="https://drtxecm.billlinch.com/en/guide.html">
+<link rel="alternate" hreflang="zh-Hant" href="https://drtxecm.billlinch.com/guide.html">
+<link rel="alternate" hreflang="x-default" href="https://drtxecm.billlinch.com/guide.html">
+<link rel="icon" href="../assets/app.ico">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://drtxecm.billlinch.com/en/guide.html">
+<meta property="og:title" content="Guide - DRTxECM">
+<meta property="og:description" content="The DRTxECM workflow: import EIS data, interactively clean noise, run DRT, decompose Gaussian peaks, then fit an equivalent circuit by CNLS and export the results. Includes a reference for the interface fields and buttons.">
+<meta property="og:image" content="https://drtxecm.billlinch.com/assets/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<header class="site">
+  <p class="brand"><a href="index.html"><img src="../assets/logo.svg" alt="DRTxECM" height="30"></a></p>
+  <span class="ver">v0.2.0</span>
+  <span class="spacer"></span>
+  <span class="lang"><a href="../guide.html">繁體中文</a></span>
+</header>
+
+<nav class="site">
+  <a href="index.html">Home</a>
+  <a href="download.html">Download</a>
+  <a class="here" href="guide.html">Guide</a>
+  <a href="method.html">Method</a>
+  <a href="faq.html">FAQ</a>
+  <a href="cite.html">Citation &amp; Credits</a>
+</nav>
+
+<h1>Guide</h1>
+<p class="lead">
+The DRTxECM interface is in <b>English</b>. Every button and field name below is quoted verbatim
+from the program, so that you can follow along on screen. The overall workflow is a fixed seven-step sequence.
+</p>
+
+<h2>Overall workflow</h2>
+
+<ol>
+  <li><b>Import</b> — import EIS data (CSV / TXT)</li>
+  <li><b>Clean Noise Data</b> — click away noise points on the plot (optional, recommended)</li>
+  <li><b>Run</b> — run the DRT to obtain γ(τ)</li>
+  <li>Inspect the DRT quality (DRT, residuals, EIS Score)</li>
+  <li><b>Launch Stage 2</b> — Gaussian peak decomposition of γ(τ)</li>
+  <li><b>Export to Stage 3</b> — adjust R, Q and α and perform the CNLS fit</li>
+  <li>Export the parameters and figures</li>
+</ol>
+
+<h2>Step 1 / Importing EIS data</h2>
+
+<p>In the <b>Import Data</b> section on the left side of the main window, click <b>Import</b> and select
+a CSV or TXT file; the "<b>EIS Data Import Preprocessing Panel (DRTxECM)</b>" window then opens.</p>
+
+<p>Different instruments (BioLogic, Autolab, Solartron, Gamry…) export different numbers of header rows
+and different column orders, and this window exists to handle those differences:</p>
+
+<table>
+  <tr><th style="width:34%">Control</th><th>Purpose</th></tr>
+  <tr><td>Number of rows to skip</td><td>Specify how many rows to skip at the start of the file (instrument header, comments, blank rows)</td></tr>
+  <tr><td><b>Toggle Column 3 (Z'') Sign (* -1)</b></td><td>Multiply the third column (the imaginary part) by &minus;1. Some instruments store Z'' as positive, which turns the Nyquist plot upside down; use this button to correct it</td></tr>
+  <tr><td><b>Confirm and Import</b></td><td>Confirm and import</td></tr>
+</table>
+
+<p>After importing, the data appear in the main window and an EIS plot is shown at the top of the screen.
+The data-parsing logic lives in <code>DataImportPreprocessor</code>; if your file format is unusual,
+the source is in <code>pyDRTtools/extensions.py</code>.</p>
+
+<h2>Step 2 / Cleaning noisy data</h2>
+
+<p>
+The menu bar has a separate action, <b>Clean Noise Data</b> (shortcut <kbd>Ctrl</kbd>+<kbd>D</kbd>).
+Clicking it opens the "<b>EIS Interactive Data Cleaning Interface</b>".
+</p>
+
+<p>On the Nyquist plot, <b>click directly on the data points you want to remove</b> to delete them;
+there is no need to go back and edit the source file.</p>
+
+<table>
+  <tr><th style="width:34%">Button</th><th>Purpose</th></tr>
+  <tr><td><b>&#8617; Undo Last Deletion</b></td><td>Undo the last deletion</td></tr>
+  <tr><td><b>Reset All Changes</b></td><td>Restore all deleted points</td></tr>
+  <tr><td><b>Apply Cleaning and Return</b></td><td>Apply and return to the main window</td></tr>
+</table>
+
+<p>The window shows <code>Current active data points:</code> — the number of remaining points — live,
+so that you can see how many points you have deleted.</p>
+
+<p class="note">
+Once cleaning is finished, the program resamples the data onto a uniform logarithmic frequency grid
+using <b>PCHIP monotone interpolation</b>. The numerical DRT method requires a uniform frequency grid,
+so this step is not a plain deletion of data: it resamples at the same time. If your data are already
+uniform and clean, you may skip this step.
+</p>
+
+<figure class="shot">
+  <a href="../assets/screenshots/01-eis-loaded.png"><img src="../assets/screenshots/01-eis-loaded.png" alt="The main window after importing the ZARC sample data: DRT settings on the left, the raw EIS Nyquist plot on the right" width="1500" height="950"></a>
+  <figcaption>
+    The state after importing the bundled ZARC sample data. On the right is the Nyquist plot of the
+    raw EIS data &mdash; a <b>depressed semicircle</b> (its centre lies below the real axis), which is
+    the signature of a CPE phase angle &alpha; &lt; 1. On the left are all the DRT settings.
+    Click the image for full size.
+  </figcaption>
+</figure>
+
+<h2>Step 3 / Configuring and running the DRT</h2>
+
+<p>The left side of the main window holds the DRT settings; the upper right shows the plots and the
+lower right the run buttons. The settings are as follows:</p>
+
+<table>
+  <tr><th style="width:30%">Field</th><th style="width:26%">Options</th><th>Description</th></tr>
+  <tr>
+    <td><b>Method of Discretization</b></td>
+    <td>Gaussian (default), C2 Matern, C4 Matern, C6 Matern, Inverse Quadratic, Inverse Quadric, Cauchy, PWL</td>
+    <td>The basis functions (radial basis) used to discretize γ(τ). Gaussian is the most common starting point; PWL is piecewise linear</td>
+  </tr>
+  <tr>
+    <td><b>Data Used</b></td>
+    <td>Combined Re-Im Data (default), Re Data, Im Data</td>
+    <td>Whether the fit uses the real part, the imaginary part, or both. Both are used by default</td>
+  </tr>
+  <tr>
+    <td><b>Inductance</b></td>
+    <td>Fitting w/o Inductance (default), Fitting with Inductance, Discard Inductive Data</td>
+    <td>Whether the inductive behavior at the high-frequency end is fitted along with the rest, ignored, or whether the data in the inductive region are simply discarded</td>
+  </tr>
+  <tr>
+    <td><b>Regularization Derivative</b></td>
+    <td>1st order (default), 2nd order</td>
+    <td>The order of the derivative in the regularization term, which controls the smoothness of γ(τ)</td>
+  </tr>
+  <tr>
+    <td><b>Parameter Selection Method</b></td>
+    <td>custom, <b>GCV</b> (the default at program start), mGCV, rGCV, LC, kf, re-im</td>
+    <td>How the regularization parameter λ is determined. With <code>custom</code> it is set manually in the field below</td>
+  </tr>
+  <tr>
+    <td><b>Regularization parameter</b></td>
+    <td>default <code>0.001</code></td>
+    <td>The manual value of λ (used only in <code>custom</code> mode)</td>
+  </tr>
+  <tr>
+    <td><b>Optimal Regularization parameter</b></td>
+    <td>read-only</td>
+    <td>The λ selected automatically by the program; it is displayed here after a run</td>
+  </tr>
+  <tr>
+    <td><b>Number of Samples</b></td>
+    <td>default <code>1000</code></td>
+    <td>Number of samples for the Bayesian-related methods (Bayesian / BHT)</td>
+  </tr>
+  <tr>
+    <td><b>RBF Shape Control</b></td>
+    <td>FWHM Coefficient (default), Shape Factor</td>
+    <td>How the width of the basis functions is determined</td>
+  </tr>
+  <tr>
+    <td><b>FWHM Control</b></td>
+    <td>default <code>0.5</code></td>
+    <td>The width coefficient of the basis functions. Larger = smoother; smaller = higher resolution but more prone to oscillation</td>
+  </tr>
+</table>
+
+<p>Once configured, three DRT algorithms can be run from the lower right, each with its own <b>Run</b> button:</p>
+
+<table>
+  <tr><th style="width:30%">Button</th><th>Method</th></tr>
+  <tr><td><b>Simple Run</b></td><td>Ridge regression / Tikhonov regularization. The fastest; use this first in ordinary cases</td></tr>
+  <tr><td><b>Bayesian Run</b></td><td>Bayesian regularization, estimating the noise and regularization hyperparameters jointly</td></tr>
+  <tr><td><b>Hilbert Transform</b></td><td>BHT (Bayesian Hilbert Transform), a variant that makes use of the Kramers-Kronig relations</td></tr>
+</table>
+
+<h2>Step 4 / Reviewing the DRT results</h2>
+
+<p>The right side of the main window has a row of display buttons that switch between plots:</p>
+
+<table>
+  <tr><th style="width:30%">Button</th><th>Plot contents</th></tr>
+  <tr><td><b>EIS Data</b></td><td>Nyquist plot of the raw EIS data</td></tr>
+  <tr><td><b>Magnitude</b></td><td>Impedance magnitude |Z| of the Bode plot</td></tr>
+  <tr><td><b>Phase</b></td><td>Phase angle of the Bode plot</td></tr>
+  <tr><td><b>Re Part</b></td><td>Real part versus frequency</td></tr>
+  <tr><td><b>Im Part</b></td><td>Imaginary part versus frequency</td></tr>
+  <tr><td><b>Re Residual</b></td><td>Real-part residual (experimental value &minus; fitted value)</td></tr>
+  <tr><td><b>Im Residual</b></td><td>Imaginary-part residual</td></tr>
+  <tr><td><b>DRT</b></td><td>The <b>γ(τ) distribution</b>, that is, the target of the decomposition in the next step</td></tr>
+  <tr><td><b>EIS Score</b></td><td>The goodness-of-fit score of each method, used to compare different settings</td></tr>
+</table>
+
+<p class="ok">
+<b>A tip for judging quality</b>: the residuals should scatter randomly around zero and should not
+curve systematically. If the residuals show clear structure, it usually means that the number of peaks
+is insufficient, that the regularization parameter λ is unsuitable, or that the high-frequency
+inductance has not been handled properly.
+</p>
+
+<figure class="shot">
+  <a href="../assets/screenshots/02-drt-result.png"><img src="../assets/screenshots/02-drt-result.png" alt="The DRT result showing a single relaxation peak in gamma(tau)" width="1500" height="950"></a>
+  <figcaption>
+    The DRT result after pressing <b>Simple Run</b> (with Parameter Selection Method set to GCV).
+    This dataset has a single clear relaxation peak, so decomposing it with one or two peaks
+    is sufficient for the next step.
+  </figcaption>
+</figure>
+
+<h2>Step 5 / Stage 2: Gaussian peak decomposition</h2>
+
+<p>
+In the <b>Peak deconvolution</b> section, enter the <b>Number of peaks</b> (default <code>3</code>),
+then click the blue <b>Launch Stage 2 (Peak Analysis)</b> button to open the
+"<b>Stage 2: DRT Peak Fitting (DRTxECM)</b>" window.
+</p>
+
+<p>This window performs a <b>multi-Gaussian peak fit</b> on the γ(τ) obtained in the previous step,
+splitting the continuous distribution into a number of discrete peaks:</p>
+
+<div class="formula">γ(ln τ) &asymp; &Sigma;<sub>i</sub> A<sub>i</sub> · exp( &minus;(ln τ &minus; &mu;<sub>i</sub>)<sup>2</sup> / (2 &sigma;<sub>i</sub><sup>2</sup>) )</div>
+
+<table>
+  <tr><th style="width:44%">Button</th><th>Purpose</th></tr>
+  <tr><td><b>View Initial Guess (Plot Guess)</b></td><td>Show the initial guess generated automatically by the program first, without optimizing</td></tr>
+  <tr><td><b>Execute Gaussian Fit</b></td><td>Run the multi-Gaussian fit</td></tr>
+  <tr><td><b>Export Stage 2 Decomposition Report (.csv)</b></td><td>Export the decomposition report: the parameters of each peak, together with the sampled points of each peak's fitted curve</td></tr>
+  <tr><td><b>Export to Stage 3 (CPE Fine-Tuning)</b></td><td>Convert the peak parameters into initial R//CPE values and open the third stage</td></tr>
+</table>
+
+<h3>Peak parameter table</h3>
+
+<p>Each peak has three fields, each with its own check box:</p>
+
+<table>
+  <tr><th style="width:26%">Field</th><th>Meaning</th></tr>
+  <tr><td><code>amp</code></td><td>Peak amplitude A<sub>i</sub></td></tr>
+  <tr><td><code>cen</code></td><td>Peak center position &mu;<sub>i</sub> (in ln τ)</td></tr>
+  <tr><td><code>wid</code></td><td>Peak width &sigma;<sub>i</sub> (default <code>0.8</code>)</td></tr>
+</table>
+
+<p>
+Checked = <b>lock that parameter</b> (it is held fixed and given no room to vary);
+unchecked = let the fit adjust it freely. If you are confident about the physical location of a
+given peak, locking it lets the other peaks converge more stably.
+</p>
+
+<figure class="shot">
+  <a href="../assets/screenshots/03-stage2-peaks.png"><img src="../assets/screenshots/03-stage2-peaks.png" alt="The Stage 2 window: a three-Gaussian-peak decomposition and its parameter table" width="1250" height="800"></a>
+  <figcaption>
+    The result after pressing <b>Execute Gaussian Fit</b>. The table on the left holds each peak's
+    amplitude <code>amp</code>, position <code>cen</code> and width <code>wid</code>; on the right the
+    black dots are the raw DRT data, the red line is the sum of the three peaks, and the coloured
+    dashed curves are the individual peaks. The top left also shows the <code>R_ohm</code> resolved in
+    Stage 1 (10.014 &Omega; for this sample).
+  </figcaption>
+</figure>
+
+<h2>Step 6 / Stage 3: equivalent-circuit CNLS fitting</h2>
+
+<p>Clicking <b>Export to Stage 3 (CPE Fine-Tuning)</b> opens the
+"<b>Stage 3: ECM Fine-Tune Panel (DRTxECM)</b>".</p>
+
+<h3>How peak parameters become circuit initial values</h3>
+
+<p>The program performs the following conversion automatically (each Gaussian peak corresponds to one
+R//CPE branch):</p>
+
+<div class="formula">
+R = A · &sigma; · &radic;(2&pi;)<br>
+&tau; = exp(&mu;)<br>
+Q = &tau; / R<br>
+&alpha; = 1.0 (starting value)
+</div>
+
+<p>In other words, the DRT peaks are not merely a visual decomposition: they directly provide a
+<b>physically reasonable starting point</b>. This is one of the greatest advantages of DRTxECM over
+general-purpose circuit-fitting tools.</p>
+
+<h3>Parameter table</h3>
+
+<p>The columns of the table on the left are <b>Element ｜ Freedom ｜ Value ｜ Error ｜ Error%</b>:</p>
+
+<table>
+  <tr><th style="width:26%">Element</th><th>Corresponding circuit element</th></tr>
+  <tr><td><code>R_ohm</code></td><td>The series ohmic resistance R<sub>0</sub> (high-frequency intercept)</td></tr>
+  <tr><td><code>L_ind</code></td><td>The series inductance L</td></tr>
+  <tr><td><code>R_i</code></td><td>Resistance of the i-th branch</td></tr>
+  <tr><td><code>Q_i</code></td><td>CPE parameter Q of the i-th branch</td></tr>
+  <tr><td><code>n_i</code></td><td>The <b>CPE phase angle &alpha;</b> of the i-th branch (0.2 to 1.0 or 1.05)</td></tr>
+</table>
+
+<p>The <b>Freedom</b> column determines how free each parameter is during optimization.
+Different element types offer different modes (these are the exact strings shown in the interface):</p>
+
+<table>
+  <tr><th style="width:20%">Element</th><th style="width:32%">Available modes</th><th>Allowed range</th></tr>
+  <tr>
+    <td><code>R_i</code>, <code>Q_i</code></td>
+    <td><code>Free</code>, <code>Free +-5%</code>, <code>Free +-10%</code>, <code>Fixed</code></td>
+    <td><code>Free</code>: 0 to &infin;; <code>Free +-5%</code> / <code>Free +-10%</code>: &plusmn;5% / &plusmn;10% of the current value; <code>Fixed</code>: locked</td>
+  </tr>
+  <tr>
+    <td><code>n_i</code> (that is, &alpha;)</td>
+    <td><code>Free</code>, <code>&lt;= 1</code>, <code>Fixed</code></td>
+    <td><code>&lt;= 1</code>: <b>0.2 to 1.0</b>; <code>Free</code>: <b>0.2 to 1.05</b>; <code>Fixed</code>: locked</td>
+  </tr>
+  <tr>
+    <td><code>L_ind</code></td>
+    <td><code>Free</code>, <code>Fixed</code></td>
+    <td><code>Free</code>: &minus;&infin; to &infin;; <code>Fixed</code>: locked</td>
+  </tr>
+</table>
+
+<p class="note">
+R, Q and L all default to <code>Fixed</code>, and &alpha; defaults to <code>&lt;= 1</code>,
+so on first entering Stage 3 <b>only the three &alpha; values can be optimized</b>.
+The recommended order is: let the &alpha; values converge first, then release R and Q one at a time.
+</p>
+
+<p class="note">
+In the formal literature the theoretical upper bound for the CPE &alpha; is 1 (an ideal capacitor).
+The program also offers a mode that allows up to 1.05, in order to absorb measurement error and
+deviations in the equivalent series resistance, so that the fit does not get stuck on a hard boundary.
+If you need the &alpha; in your report to conform strictly to the physical definition, use <code>&lt;= 1</code>.
+</p>
+
+<h3>Running the fit</h3>
+
+<ol>
+  <li>Click <b>Simulation</b> first to draw the simulated curve with the current parameter values and confirm that the starting state is reasonable</li>
+  <li>Click the green <b>Fitting (Optimize Parameters)</b> button to run the CNLS optimization</li>
+  <li>Once converged, the Value column is updated to the optimal values, and the Error and Error% columns show the estimated standard errors</li>
+  <li>The Nyquist and Bode plots on the right update in step, with each branch drawn in a different color</li>
+</ol>
+
+<p>
+The bottom of the window shows <code>Complex Impedance RMSE</code>, which is updated after Fitting
+to the RMSE value with units.
+</p>
+
+<figure class="shot">
+  <a href="../assets/screenshots/04-stage3-ecm.png"><img src="../assets/screenshots/04-stage3-ecm.png" alt="The Stage 3 parameter table after fitting, with branch-resolved Nyquist and Bode plots" width="1500" height="900"></a>
+  <figcaption>
+    The outcome of Fitting with three branches, R and Q set to <code>Free +-10%</code> and &alpha; set to
+    <code>&lt;= 1</code>. Note the <code>Error%</code> column: this example fits a single ZARC semicircle
+    with three branches, which over-parameterizes the data, so the standard errors are large.
+    In practice the number of peaks should match the actual peaks in the DRT curve rather than being
+    increased just to lower the RMSE.
+  </figcaption>
+</figure>
+
+<h2>Step 7 / Exporting the results</h2>
+
+<table>
+  <tr><th style="width:26%">Location</th><th style="width:30%">Button</th><th>What is exported</th></tr>
+  <tr><td>Main window, <b>Export</b> section</td><td><b>DRT</b> → Export</td><td>The γ(τ) result of the DRT (frequency, τ, γ)</td></tr>
+  <tr><td>Main window, <b>Export</b> section</td><td><b>EIS Regression</b> → Export</td><td>The fitted EIS values and the residuals</td></tr>
+  <tr><td>Main window, <b>Export</b> section</td><td><b>Figure</b> → Save</td><td>The figure currently displayed</td></tr>
+  <tr><td>Stage 2</td><td><b>Export Stage 2 Decomposition Report (.csv)</b></td><td>The peak parameters and the decomposition curve of each peak</td></tr>
+  <tr><td>Stage 3</td><td><b>Export Datasheet (.csv)</b></td><td>The circuit parameters, standard errors, and the combined report after fitting</td></tr>
+</table>
+
+<h2>Troubleshooting</h2>
+
+<h3>Clicking Clean Noise Data says there is no data</h3>
+<p>The warning <code>No EIS data loaded!</code> appears. Click <b>Import</b> to load data first.</p>
+
+<h3>The DRT curve goes negative or oscillates violently</h3>
+<p>
+This is usually under-regularization (λ too small) or an FWHM Control that is too small. You can:
+leave <b>Parameter Selection Method</b> on GCV so that the program selects λ automatically;
+increase <b>FWHM Control</b>; or switch to <b>Bayesian Run</b>.
+</p>
+
+<h3>The fit does not converge</h3>
+<p>
+The common cause is initial values that lie too far from the true values. The recommended order is:
+use Stage 2 first to obtain a good initial guess → in Stage 3, <b>release the parameters one at a
+time</b> rather than setting them all to <code>free</code> at once. In practice, release R and Q first
+and release &alpha; once they have converged; this is much more stable.
+</p>
+
+<h3>α sticks at 0.2 or 1.0</h3>
+<p>
+This means that the optimum lies on a boundary. If it sticks at 1.0, the branch may in fact be close
+to an ideal capacitor, or the data quality may not support a free fit of &alpha;; if it sticks at 0.2,
+the frequency range of that branch is usually too narrow or it has too few points. You can check the
+branch's coverage in the Nyquist plot.
+</p>
+
+<h3>Error% shows <code>N/A</code> or <code>&lt;15%</code></h3>
+<p>
+The uncertainty is estimated from the inverse Hessian matrix. If the Hessian cannot be obtained or is
+unstable, the program falls back to displaying <code>N/A</code>; in some cases it shows
+<code>&lt;15%</code> instead, as a rough upper bound on the relative error. This is not an error, but
+it does mean that the standard errors for that parameter set should be treated with caution.
+</p>
+
+<h3>The Stage 2 fit takes a long time</h3>
+<p>
+The multi-Gaussian fit iterates at most 10000 times. The more peaks there are, the slower it is.
+Start with 2 to 4 peaks and increase the number once you have confirmed the shape of γ(τ).
+</p>
+
+<footer class="site">
+  DRTxECM — open-source DRT-to-equivalent-circuit modeling ·
+  <a href="https://github.com/Linch-Lab/DRTxECM/blob/master/LICENSE">MIT License</a><br>
+  <a href="https://github.com/Linch-Lab/DRTxECM">GitHub</a> ·
+  <a href="download.html">Download</a> ·
+  <a href="method.html">Method</a> ·
+  <a href="cite.html">Citation &amp; Credits</a> ·
+  <a href="https://github.com/Linch-Lab/DRTxECM/issues">Report an issue</a><br>
+  This is a static page: no JavaScript, no data collection.
+</footer>
+
+</body>
+</html>

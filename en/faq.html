@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FAQ - DRTxECM</title>
+<meta name="description" content="DRTxECM FAQ: SmartScreen warnings, data format, how many peaks to choose, negative DRT values, the range of &alpha;, differences from commercial software, privacy and licensing.">
+<link rel="canonical" href="https://drtxecm.billlinch.com/en/faq.html">
+<link rel="alternate" hreflang="en" href="https://drtxecm.billlinch.com/en/faq.html">
+<link rel="alternate" hreflang="zh-Hant" href="https://drtxecm.billlinch.com/faq.html">
+<link rel="alternate" hreflang="x-default" href="https://drtxecm.billlinch.com/faq.html">
+<link rel="icon" href="../assets/app.ico">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://drtxecm.billlinch.com/en/faq.html">
+<meta property="og:title" content="FAQ - DRTxECM">
+<meta property="og:description" content="Common questions about installation, data format, fitting settings and licensing.">
+<meta property="og:image" content="https://drtxecm.billlinch.com/assets/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<header class="site">
+  <p class="brand"><a href="index.html"><img src="../assets/logo.svg" alt="DRTxECM" height="30"></a></p>
+  <span class="ver">v0.2.0</span>
+  <span class="spacer"></span>
+  <span class="lang"><a href="../faq.html">繁體中文</a></span>
+</header>
+
+<nav class="site">
+  <a href="index.html">Home</a>
+  <a href="download.html">Download</a>
+  <a href="guide.html">Guide</a>
+  <a href="method.html">Method</a>
+  <a class="here" href="faq.html">FAQ</a>
+  <a href="cite.html">Citation &amp; Credits</a>
+</nav>
+
+<h1>Frequently asked questions</h1>
+
+<h2>Installation and running</h2>
+
+<h3>Windows shows "Unknown publisher" or a SmartScreen warning?</h3>
+<p>
+Because this project has not purchased a code-signing certificate. That is <b>common to all free
+open-source software</b> and does not mean it is a virus.
+You can click "More info" → "Run anyway"; or <b>build it yourself from source</b>,
+so that you can be sure the executable matches the code. You can also verify the file with SHA256 on the
+<a href="download.html#verify">download page</a>.
+</p>
+
+<h3>Do I need to install Python?</h3>
+<p>
+No. The ZIP you download already contains the runtime environment (PyQt5 and all the scientific computing packages);
+just unzip it and run <code>DRTxECM.exe</code>.
+Python is only needed if you want to run or build the program from source yourself.
+</p>
+
+<h3>My antivirus software says it is a virus?</h3>
+<p>
+Executables packaged with PyInstaller are occasionally misidentified; this is a well-known false alarm in the industry.
+This project's build pipeline deliberately disables UPX compression in order to lower the false-positive rate.
+You can verify the file with SHA256 first, or build from source yourself.
+</p>
+
+<h3>Is macOS / Linux supported?</h3>
+<p>
+The program itself is a cross-platform Python project (PyQt5 + matplotlib) and can be run from source on macOS and Linux.
+However, the <b>packaged portable build is currently available for Windows only</b>,
+because the packaging pipeline is built in a Windows environment. For how to run it on macOS / Linux, see
+"Running from source" on the <a href="download.html">download page</a>.
+</p>
+
+<h3>The first launch is very slow?</h3>
+<p>
+This is normal. The first launch has to load libraries such as PyQt5, matplotlib, scipy and scikit-learn,
+which can take a few seconds to a dozen or so seconds depending on your disk speed. Later launches are faster.
+</p>
+
+<h3>It reports "xxx.dll not found"?</h3>
+<p>
+This usually means it was run without being fully unzipped, or that the extraction was interrupted.
+Please delete the whole folder and unzip it again, and <b>do not double-click the executable from inside the ZIP file</b>.
+</p>
+
+<h2>Data and operation</h2>
+
+<h3>What data formats are supported?</h3>
+<p>
+CSV and TXT, with three columns (frequency, Z', Z''). Different instruments use different numbers of header rows,
+so on import the "EIS Data Import Preprocessing Panel" opens and lets you specify how many rows to skip;
+you can also use <b>Toggle Column 3 (Z'') Sign (* -1)</b> to correct the sign of the imaginary part.
+</p>
+
+<h3>How many data points should I have?</h3>
+<p>
+DRT is an ill-posed inverse problem: the more points and the wider the frequency coverage, the more stable it is.
+In practice, at least 8 to 10 points per decade are recommended, spanning more than 4 decades overall.
+Too few points will make the resolution of &gamma;(&tau;) insufficient and will also make the free fitting of &alpha; meaningless.
+</p>
+
+<h3>Is data cleaning mandatory?</h3>
+<p>
+Not strictly, but it is strongly recommended. A single outlier generates a whole sheet of spurious peaks in the DRT,
+which then biases the Gaussian decomposition and the circuit fitting that follow. Use <b>Clean Noise Data</b>
+(<kbd>Ctrl</kbd>+<kbd>D</kbd>) to click them away on the plot — a very small cost for a large benefit.
+</p>
+
+<h3>Can I do only the DRT and skip the circuit fitting?</h3>
+<p>
+Yes. The DRT results of Stage 1 are completely consistent with pyDRTtools,
+so you can use that stage alone and export &gamma;(&tau;) without ever entering Stages 2 and 3.
+</p>
+
+<h3>Is the interface in English?</h3>
+<p>
+Yes. The graphical interface uses pyDRTtools' original English labels,
+so that existing pyDRTtools users do not have to adapt to anything new.
+The Chinese documentation on this website quotes the English terms directly, to make cross-referencing easy.
+</p>
+
+<h2>Method and fitting</h2>
+
+<h3>How many peaks should I choose?</h3>
+<p>
+First look at how many distinct peaks the DRT &gamma;(&tau;) has, and start from that number.
+Too few peaks leaves systematic structure in the fitting residuals; too many overfits and produces branches with no physical meaning.
+It is advisable to start from 2 to 4 and judge by the <b>EIS Score</b> and the residual plots.
+</p>
+
+<h3>The DRT results contain negative values?</h3>
+<p>
+Negative values of &gamma;(&tau;) usually indicate <b>insufficient regularization</b>. You can: set the <b>Parameter Selection Method</b>
+to GCV so that the program selects &lambda; automatically, increase <b>FWHM Control</b>, switch to <b>Bayesian Run</b>,
+or check whether the high-frequency inductance is being handled properly.
+</p>
+
+<h3>Can &alpha; be greater than 1?</h3>
+<p>
+Theoretically not. The domain of the CPE &alpha; is (0, 1], and &alpha; = 1 is an ideal capacitor.
+The DRTxECM default mode <code>&lt;= 1</code> restricts &alpha; to [0.2, 1.0];
+an additional mode allows values up to <b>1.05</b>, to absorb measurement error and series-resistance deviation
+so that the fit is not blocked by a hard boundary. If the reported values must conform strictly to the physical definition, use <code>&lt;= 1</code>.
+</p>
+
+<h3>What if the fit does not converge?</h3>
+<p>
+The most common cause is initial values that are too far off. Suggestions: first use Stage 2 to obtain a good initial guess,
+then in Stage 3 <b>release the parameters one at a time</b> — let R and Q be free first, and release &alpha; after convergence.
+Setting all parameters to <code>free</code> at once usually fails.
+</p>
+
+<h3>How is this different from commercial software such as ZView?</h3>
+<p>
+The main differences are three: (1) DRTxECM has a complete DRT analysis built in, so you do not need to do it separately;
+(2) the initial values for circuit fitting are derived automatically from the DRT peaks, so there is no manual guessing;
+(3) the CPE phase angle &alpha; is a freely fitted parameter rather than being fixed or constrained.
+For a detailed comparison, see <a href="method.html">Method</a>.
+</p>
+
+<h3>Can it converge to exactly the same DRT results as pyDRTtools?</h3>
+<p>
+Yes — and it does by construction. DRTxECM does not modify the pyDRTtools DRT computation code at all;
+the same data and settings give the same &gamma;(&tau;).
+</p>
+
+<h2>Cost, privacy and licensing</h2>
+
+<h3>Do I have to pay?</h3>
+<p>
+It is completely free and open source (MIT). No ads, no tracking, no paid version, no feature tiers.
+</p>
+
+<h3>Is my data uploaded anywhere?</h3>
+<p>
+<b>No.</b> All computation — including the DRT, the Gaussian decomposition and the circuit fitting — runs on your own computer.
+The program contains no network requests and no telemetry. You can use it with the network completely disconnected.
+</p>
+
+<h3>Can I use it commercially?</h3>
+<p>
+Yes. The MIT license permits use, modification and distribution without restriction, including commercial use.
+The only condition is that the copyright notice is retained.
+</p>
+
+<h3>How should I cite it in a paper?</h3>
+<p>
+If you use DRT computation results, <b>you must cite the original pyDRTtools publications</b>.
+How to cite DRTxECM itself, together with the complete reference list, is compiled under
+<a href="cite.html">Citation &amp; Credits</a>.
+</p>
+
+<h2>Other</h2>
+
+<h3>I found a bug, or I would like to request a feature?</h3>
+<p>
+Please report it at <a href="https://github.com/Linch-Lab/DRTxECM/issues">GitHub Issues</a>.
+When reporting, include your Windows version, the DRTxECM version, and the DRT settings you used
+(discretization basis, Data Used, regularization parameter, etc.); this makes the problem much easier to reproduce.
+</p>
+
+<h3>Can I contribute code?</h3>
+<p>
+You are welcome to. The project is MIT licensed, and both pull requests and issues are open.
+If you modify the original DRT code under <code>pyDRTtools/</code>,
+please note that <code>extensions.py</code> and <code>layout.py</code> are the DRTxECM extension parts,
+while the remaining files are the original pyDRTtools content.
+</p>
+
+<footer class="site">
+  DRTxECM — open-source DRT-to-equivalent-circuit modeling ·
+  <a href="https://github.com/Linch-Lab/DRTxECM/blob/master/LICENSE">MIT License</a><br>
+  <a href="https://github.com/Linch-Lab/DRTxECM">GitHub</a> ·
+  <a href="download.html">Download</a> ·
+  <a href="method.html">Method</a> ·
+  <a href="cite.html">Citation &amp; Credits</a> ·
+  <a href="https://github.com/Linch-Lab/DRTxECM/issues">Report an issue</a><br>
+  This is a static page: no JavaScript, no data collection.
+</footer>
+
+</body>
+</html>

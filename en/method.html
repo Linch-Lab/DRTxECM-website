@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Method - DRTxECM</title>
+<meta name="description" content="The three stages of DRTxECM: DRT deconvolution with Tikhonov regularization, Gaussian peak decomposition and conversion into R//CPE initial values, and CNLS equivalent-circuit fitting with parameter uncertainty estimation.">
+<link rel="canonical" href="https://drtxecm.billlinch.com/en/method.html">
+<link rel="alternate" hreflang="en" href="https://drtxecm.billlinch.com/en/method.html">
+<link rel="alternate" hreflang="zh-Hant" href="https://drtxecm.billlinch.com/method.html">
+<link rel="alternate" hreflang="x-default" href="https://drtxecm.billlinch.com/method.html">
+<link rel="icon" href="../assets/app.ico">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://drtxecm.billlinch.com/en/method.html">
+<meta property="og:title" content="Method - DRTxECM">
+<meta property="og:description" content="The three stages of DRTxECM: DRT deconvolution with Tikhonov regularization, Gaussian peak decomposition and conversion into R//CPE initial values, and CNLS equivalent-circuit fitting with parameter uncertainty estimation.">
+<meta property="og:image" content="https://drtxecm.billlinch.com/assets/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<header class="site">
+  <p class="brand"><a href="index.html"><img src="../assets/logo.svg" alt="DRTxECM" height="30"></a></p>
+  <span class="ver">v0.2.0</span>
+  <span class="spacer"></span>
+  <span class="lang"><a href="../method.html">繁體中文</a></span>
+</header>
+
+<nav class="site">
+  <a href="index.html">Home</a>
+  <a href="download.html">Download</a>
+  <a href="guide.html">Guide</a>
+  <a class="here" href="method.html">Method</a>
+  <a href="faq.html">FAQ</a>
+  <a href="cite.html">Citation &amp; Credits</a>
+</nav>
+
+<h1>Method</h1>
+<p class="lead">
+This page explains what problem each of the three stages of DRTxECM solves, which numerical methods
+it uses, and which parts follow pyDRTtools and which are newly added extensions.
+</p>
+
+<div class="pipe">
+  <div class="step"><b>① DRT deconvolution</b><span>Tikhonov-regularized linear inversion</span></div>
+  <div class="arw">&rarr;</div>
+  <div class="step"><b>② Gaussian peak decomposition</b><span>Nonlinear least squares (multi-Gaussian)</span></div>
+  <div class="arw">&rarr;</div>
+  <div class="step"><b>③ CNLS fitting</b><span>Bounded nonlinear optimization (L-BFGS-B)</span></div>
+</div>
+
+<h2>Stage 1: DRT deconvolution</h2>
+
+<p>
+An electrochemical impedance spectrum can be written in the integral form of a distribution of
+relaxation times (DRT, Distribution of Relaxation Times):
+</p>
+
+<div class="formula">Z(&omega;) = R<sub>&infin;</sub> + &int; γ(ln τ) / (1 + j&omega;τ) &nbsp;d ln τ</div>
+
+<p>
+If there is inductive behavior at the high-frequency end, a series inductance term is added:
+</p>
+
+<div class="formula">Z(&omega;) = R<sub>&infin;</sub> + j&omega;L + &int; γ(ln τ) / (1 + j&omega;τ) &nbsp;d ln τ</div>
+
+<p>
+γ(ln τ) is the DRT result. Because γ is a continuous function while the measured data are finite and
+noisy, this inversion problem is <b>ill-posed</b>: solving it directly yields a violently oscillating
+solution with no physical meaning. The pyDRTtools approach is to discretize γ with basis functions and
+then introduce regularization.
+</p>
+
+<h3>Discretization and Tikhonov regularization</h3>
+
+<p>
+Expanding γ in a set of basis functions, γ(ln τ) = &Sigma;<sub>n</sub> x<sub>n</sub> φ<sub>n</sub>(ln τ),
+and substituting this into the integral turns the problem into a linear system <b>A x = b</b>,
+where b is the measured impedance (the real and imaginary parts may be concatenated).
+The objective is then ridge regression (Tikhonov regularization):
+</p>
+
+<div class="formula">min<sub>x</sub> &nbsp; &#8214;A x &minus; b&#8214;<sup>2</sup> + λ &#8214;M x&#8214;<sup>2</sup></div>
+
+<p>
+λ is the regularization parameter and M is a matrix determined by the order of the derivative. If λ is
+too large it flattens γ and destroys resolution; if λ is too small, oscillatory spurious peaks appear.
+<b>The choice of λ is the most critical step in DRT analysis.</b>
+</p>
+
+<table>
+  <tr><th style="width:20%">Option</th><th>Description</th></tr>
+  <tr><td><b>custom</b></td><td>λ is specified manually by the user</td></tr>
+  <tr><td><b>GCV</b></td><td>Generalized Cross-Validation</td></tr>
+  <tr><td><b>mGCV</b></td><td>A modified GCV</td></tr>
+  <tr><td><b>rGCV</b></td><td>A robust GCV</td></tr>
+  <tr><td><b>LC</b></td><td>The L-curve method</td></tr>
+  <tr><td><b>kf</b></td><td>K-fold cross-validation</td></tr>
+  <tr><td><b>re-im</b></td><td>Real-part / imaginary-part cross-validation</td></tr>
+</table>
+
+<h3>Discretization bases</h3>
+
+<table>
+  <tr><th style="width:30%">Basis</th><th>Characteristics</th></tr>
+  <tr><td><b>Gaussian</b></td><td>The default; smooth and the most stable for general use</td></tr>
+  <tr><td><b>C2 Matern</b></td><td rowspan="3">The Matern family, with adjustable smoothness (C2 → C6, increasingly smooth in that order)</td></tr>
+  <tr><td><b>C4 Matern</b></td></tr>
+  <tr><td><b>C6 Matern</b></td></tr>
+  <tr><td><b>Inverse Quadratic</b></td><td>Long-tailed; suited to broad relaxation-time distributions</td></tr>
+  <tr><td><b>Inverse Quadric</b></td><td>Another long-tailed form</td></tr>
+  <tr><td><b>Cauchy</b></td><td>Long-tailed, less prone to sharp peaks</td></tr>
+  <tr><td><b>PWL</b></td><td>Piecewise linear; it does not use Toeplitz acceleration, so it is slower to compute but the least restrictive</td></tr>
+</table>
+
+<p>
+The width of the basis is determined by <b>RBF Shape Control</b> (<code>FWHM Coefficient</code> or
+<code>Shape Factor</code>), and its value is specified by <b>FWHM Control</b>, default <code>0.5</code>.
+This width determines the resolution limit of the DRT.
+</p>
+
+<h3>Other DRT algorithms</h3>
+
+<table>
+  <tr><th style="width:30%">Method</th><th>Principle</th></tr>
+  <tr>
+    <td><b>Simple Run</b></td>
+    <td>Tikhonov / ridge regression (the method described above), solved by optimization. <code>Parameter Selection Method</code> determines λ</td>
+  </tr>
+  <tr>
+    <td><b>Bayesian Run</b></td>
+    <td>Bayesian regularization: the noise variance and the regularization hyperparameter are treated as unknowns to be inferred, and the solution is obtained by sampling the posterior distribution</td>
+  </tr>
+  <tr>
+    <td><b>Hilbert Transform</b></td>
+    <td>BHT (Bayesian Hilbert Transform): the Kramers-Kronig relations are used to link the real and imaginary parts, and the problem is then solved within a Bayesian framework</td>
+  </tr>
+</table>
+
+<p class="note">
+The package also contains implementations of GP-DRT (<code>fGP.py</code>, Gaussian process) and HMC
+(<code>HMC.py</code>, Hamiltonian Monte Carlo), but the graphical interface currently provides no
+buttons for them; they can be called directly from the Python API. All of the DRT computations above
+<b>reuse the original pyDRTtools source code</b>; DRTxECM has made no changes to it.
+</p>
+
+<h2>Stage 2: Gaussian peak decomposition</h2>
+
+<p>
+The γ(ln τ) obtained from the DRT is a continuous curve, but a real physical system is usually made up
+of a finite number of relaxation processes. The second stage fits this curve with <b>several Gaussian
+functions</b>:
+</p>
+
+<div class="formula">γ(ln τ) &asymp; &Sigma;<sub>i</sub> A<sub>i</sub> · exp( &minus;(ln τ &minus; &mu;<sub>i</sub>)<sup>2</sup> / (2 &sigma;<sub>i</sub><sup>2</sup>) )</div>
+
+<p>
+This is a nonlinear least-squares problem, solved with <code>scipy.optimize.curve_fit</code> with an
+iteration limit of 10000. The number of peaks is specified by the user (the <b>Number of peaks</b>
+field in the interface), and after the fit you can manually fine-tune the amplitude, position and
+width of any peak.
+</p>
+
+<h3>From peaks to circuit initial values</h3>
+
+<p>
+This is the bridge between the second and the third stage. Each Gaussian peak corresponds to one
+R//CPE branch, converted as follows (implemented in <code>Stage2Window.export_to_stage3</code>):
+</p>
+
+<table>
+  <tr><th style="width:34%">Circuit parameter</th><th>Converted from the peak parameters</th></tr>
+  <tr><td>Resistance <b>R</b></td><td><code>R = A · &sigma; · &radic;(2&pi;)</code></td></tr>
+  <tr><td>Time constant <b>&tau;</b></td><td><code>&tau; = exp(&mu;)</code></td></tr>
+  <tr><td>CPE parameter <b>Q</b></td><td><code>Q = &tau; / R</code></td></tr>
+  <tr><td>Phase angle <b>&alpha;</b></td><td><code>&alpha; = 1.0</code> (a starting value; it is determined by the fit only afterwards)</td></tr>
+</table>
+
+<p>
+The rationale for the conversion is that <code>A·&sigma;·&radic;(2&pi;)</code> is the area of the
+Gaussian on the ln τ axis, corresponding to the total resistance R contributed by that relaxation
+process; and when &alpha; = 1, the time constant of the R//CPE branch is exactly &tau; = R·Q, so Q is
+back-calculated from &tau; and R. The center position &mu; of the peak is ln τ, so taking the
+exponential recovers &tau;.
+</p>
+
+<p class="ok">
+This is the "<b>DRT-informed initial guess</b>": the starting values are not random guesses but are
+derived from the relaxation-time structure of the data itself, which greatly reduces the chance of the
+nonlinear fit falling into a local minimum.
+</p>
+
+<h2>Stage 3: CNLS equivalent-circuit fitting</h2>
+
+<h3>Circuit model</h3>
+
+<p>The equivalent circuit used by DRTxECM is a series LR<sub>0</sub> + &Sigma;(R<sub>i</sub>//CPE<sub>i</sub>):</p>
+
+<div class="formula">Z(&omega;) = R<sub>0</sub> + j&omega;L + &Sigma;<sub>i</sub> &nbsp; 1 / ( 1/R<sub>i</sub> + Q<sub>i</sub>(j&omega;)<sup>&alpha;<sub>i</sub></sup> )</div>
+
+<p>where the impedance of a single CPE is:</p>
+
+<div class="formula">Z<sub>CPE</sub> = 1 / ( Q (j&omega;)<sup>&alpha;</sup> )</div>
+
+<p>
+When &alpha; = 1, Q degenerates to an ideal capacitance C and the branch becomes a standard RC
+semicircle; when &alpha; &lt; 1, the semicircle in the Nyquist plot is depressed and its center falls
+below the real axis. <b>The degree of depression corresponds directly to the value of &alpha;</b>,
+which is also where the shape of this website's logo comes from.
+</p>
+
+<h3>Objective function and optimization</h3>
+
+<p>The fit minimizes the sum of squares over the real and imaginary parts of the complex impedance simultaneously (CNLS, Complex Nonlinear Least Squares):</p>
+
+<div class="formula">&chi;<sup>2</sup>(x) = &Sigma;<sub>k</sub> [ ( Re Z<sub>exp,k</sub> &minus; Re Z<sub>sim,k</sub> )<sup>2</sup> + ( Im Z<sub>exp,k</sub> &minus; Im Z<sub>sim,k</sub> )<sup>2</sup> ]</div>
+
+<p>
+The optimizer is <b>L-BFGS-B</b> from <code>scipy.optimize.minimize</code> (a limited-memory
+quasi-Newton method that supports upper and lower bounds on the parameters), with the convergence
+tolerances set to <code>ftol = gtol = 1e-12</code>.
+</p>
+
+<table>
+  <tr><th style="width:22%">Parameter</th><th style="width:30%">Available modes</th><th>Corresponding bounds</th></tr>
+  <tr>
+    <td><b>R</b>, <b>Q</b></td>
+    <td><code>Free</code>, <code>Free +-5%</code>, <code>Free +-10%</code>, <code>Fixed</code></td>
+    <td><code>Free</code> &rarr; [0, &infin;); <code>Free +-5%</code> &rarr; &plusmn;5% of the current value; <code>Free +-10%</code> &rarr; &plusmn;10% of the current value; <code>Fixed</code> &rarr; excluded from the optimization vector</td>
+  </tr>
+  <tr>
+    <td><b>&alpha;</b> (<code>n_i</code>)</td>
+    <td><code>Free</code>, <code>&lt;= 1</code>, <code>Fixed</code></td>
+    <td><code>&lt;= 1</code> &rarr; [0.2, 1.0]; <code>Free</code> &rarr; [0.2, 1.05]; <code>Fixed</code> &rarr; excluded from the optimization vector</td>
+  </tr>
+  <tr>
+    <td><b>L</b></td>
+    <td><code>Free</code>, <code>Fixed</code></td>
+    <td><code>Free</code> &rarr; (&minus;&infin;, &infin;); <code>Fixed</code> &rarr; excluded from the optimization vector</td>
+  </tr>
+</table>
+
+<p>
+A parameter set to <code>Fixed</code> is not placed in the optimization variable vector,
+and therefore does not count towards the degrees of freedom p.
+The interface defaults are: <code>Fixed</code> for R, Q and L, and <code>&lt;= 1</code> for &alpha;.
+</p>
+
+<h3>Parameter uncertainty</h3>
+
+<p>
+After the optimization converges, the program computes the degrees of freedom and the mean squared
+error, and then estimates the covariance from the inverse Hessian matrix:
+</p>
+
+<div class="formula">
+dof = 2N &minus; p &nbsp;&nbsp;(N is the number of frequency points and p the number of optimized parameters)<br>
+mse = &chi;<sup>2</sup> / dof<br>
+cov = H<sup>&minus;1</sup> · mse<br>
+Error<sub>j</sub> = &radic;( cov<sub>jj</sub> )
+</div>
+
+<p>
+The inverse Hessian returned by L-BFGS-B is in the form of a <code>LinearOperator</code>; the program
+converts it into a dense matrix before computing. If it cannot be obtained, the program falls back to
+a numerical Jacobian approximation. This is the source of the <b>Error</b> and <b>Error%</b> columns
+in the Stage 3 parameter table.
+</p>
+
+<h2>Why the CPE phase angle &alpha; is treated as a free parameter</h2>
+
+<p>
+This is the most important design decision in DRTxECM. Real electrode surfaces are rough and reactions
+are non-uniform, so the CPE &alpha; is usually clearly below 1 (commonly between 0.7 and 0.95). Many
+commercial equivalent-circuit programs, however, fix &alpha; at 1, or restrict it to a very narrow
+range, in order to keep convergence stable.
+</p>
+
+<p>Doing so has two consequences:</p>
+
+<ul>
+  <li>The fitting error is <b>shifted onto</b> R and Q, pushing these two parameters away from their true values</li>
+  <li>The report looks "very ideal", but in fact it conceals the true physical state of the electrode</li>
+</ul>
+
+<p>
+DRTxECM optimizes &alpha; together with R and Q, so you can distinguish "this branch really is close
+to an ideal capacitor" from "this branch only looks like an ideal capacitor because it was fixed".
+The default bounds <code>[0.2, 1.0]</code> cover the great majority of the actual CPE values reported
+in the literature.
+</p>
+
+<h2>How DRTxECM differs from other tools</h2>
+
+<table>
+  <tr>
+    <th style="width:24%">Capability</th>
+    <th style="width:25%">General-purpose circuit-fitting software</th>
+    <th style="width:25%">pyDRTtools</th>
+    <th>DRTxECM</th>
+  </tr>
+  <tr>
+    <td>DRT computation</td>
+    <td>No (or requires a plugin)</td>
+    <td><b>Complete</b> (Tikhonov, Bayesian, BHT, GP-DRT)</td>
+    <td>Complete (reused, unmodified)</td>
+  </tr>
+  <tr>
+    <td>Equivalent-circuit fitting</td>
+    <td><b>Complete</b></td>
+    <td>No</td>
+    <td><b>Yes</b> (LR<sub>0</sub> + &Sigma;R//CPE)</td>
+  </tr>
+  <tr>
+    <td>CPE phase angle &alpha;</td>
+    <td>Usually fixed or range-limited</td>
+    <td>Not applicable</td>
+    <td><b>Fitted freely</b> (0.2–1.05)</td>
+  </tr>
+  <tr>
+    <td>Source of initial values</td>
+    <td>Manual entry or random</td>
+    <td>Not applicable</td>
+    <td><b>Converted automatically from the DRT peaks</b></td>
+  </tr>
+  <tr>
+    <td>Parameter uncertainty</td>
+    <td>Available in some</td>
+    <td>Not applicable</td>
+    <td>Yes (inverse-Hessian estimate)</td>
+  </tr>
+  <tr>
+    <td>License</td>
+    <td>Mostly commercial</td>
+    <td>MIT</td>
+    <td>MIT</td>
+  </tr>
+</table>
+
+<h2>Theoretical foundations and citations</h2>
+
+<p>
+The DRT method of the first stage builds on the existing work of pyDRTtools; for all the mathematical
+derivations, equation numbers and original references, see <a href="cite.html">Citation &amp; Credits</a>.
+If you use these results in a paper, please be sure to cite the corresponding original references.
+</p>
+
+<footer class="site">
+  DRTxECM — open-source DRT-to-equivalent-circuit modeling ·
+  <a href="https://github.com/Linch-Lab/DRTxECM/blob/master/LICENSE">MIT License</a><br>
+  <a href="https://github.com/Linch-Lab/DRTxECM">GitHub</a> ·
+  <a href="download.html">Download</a> ·
+  <a href="method.html">Method</a> ·
+  <a href="cite.html">Citation &amp; Credits</a> ·
+  <a href="https://github.com/Linch-Lab/DRTxECM/issues">Report an issue</a><br>
+  This is a static page: no JavaScript, no data collection.
+</footer>
+
+</body>
+</html>

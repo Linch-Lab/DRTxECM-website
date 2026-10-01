@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>使用說明 - DRTxECM</title>
+<meta name="description" content="DRTxECM 操作流程：匯入 EIS 資料、互動式清理雜訊、執行 DRT、高斯峰分解，到等效電路 CNLS 擬合與結果匯出。含介面欄位與按鈕對照。">
+<link rel="canonical" href="https://drtxecm.billlinch.com/guide.html">
+<link rel="alternate" hreflang="zh-Hant" href="https://drtxecm.billlinch.com/guide.html">
+<link rel="alternate" hreflang="en" href="https://drtxecm.billlinch.com/en/guide.html">
+<link rel="alternate" hreflang="x-default" href="https://drtxecm.billlinch.com/guide.html">
+<link rel="icon" href="assets/app.ico">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://drtxecm.billlinch.com/guide.html">
+<meta property="og:title" content="使用說明 - DRTxECM">
+<meta property="og:description" content="從匯入資料到等效電路擬合的完整操作流程。">
+<meta property="og:image" content="https://drtxecm.billlinch.com/assets/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="site">
+  <p class="brand"><a href="index.html"><img src="assets/logo.svg" alt="DRTxECM" height="30"></a></p>
+  <span class="ver">v0.2.0</span>
+  <span class="spacer"></span>
+  <span class="lang"><a href="en/guide.html">English</a></span>
+</header>
+
+<nav class="site">
+  <a href="index.html">首頁</a>
+  <a href="download.html">下載</a>
+  <a class="here" href="guide.html">使用說明</a>
+  <a href="method.html">方法與原理</a>
+  <a href="faq.html">常見問題</a>
+  <a href="cite.html">引用與致謝</a>
+</nav>
+
+<h1>使用說明</h1>
+<p class="lead">
+DRTxECM 的介面是<b>英文</b>。以下按鈕與欄位名稱都直接引用程式中的原文，
+方便你對照畫面操作。整體流程是固定的七個步驟。
+</p>
+
+<h2>整體流程</h2>
+
+<ol>
+  <li><b>Import</b> —— 匯入 EIS 資料（CSV / TXT）</li>
+  <li><b>Clean Noise Data</b> —— 在圖上點掉雜訊點（選用，建議做）</li>
+  <li><b>Run</b> —— 執行 DRT，得到 γ(τ)</li>
+  <li>檢視 DRT 品質（DRT、殘差、EIS Score）</li>
+  <li><b>Launch Stage 2</b> —— 對 γ(τ) 做高斯峰分解</li>
+  <li><b>Export to Stage 3</b> —— 調整 R、Q、α 並做 CNLS 擬合</li>
+  <li>匯出參數與圖檔</li>
+</ol>
+
+<h2>步驟 1 ／ 匯入 EIS 資料</h2>
+
+<p>在主視窗左側的 <b>Import Data</b> 區塊按 <b>Import</b>，選擇 CSV 或 TXT 檔後，
+會開啟「<b>EIS Data Import Preprocessing Panel (DRTxECM)</b>」視窗。</p>
+
+<p>不同儀器（BioLogic、Autolab、Solartron、Gamry…）匯出的表頭列數與欄位順序都不一樣，
+這個視窗就是用來處理這些差異：</p>
+
+<table>
+  <tr><th style="width:34%">控制項</th><th>作用</th></tr>
+  <tr><td>跳過列數設定</td><td>指定檔案開頭要略過幾列（儀器表頭、註解、空白列）</td></tr>
+  <tr><td><b>Toggle Column 3 (Z'') Sign (* -1)</b></td><td>把第三欄（虛部）乘上 &minus;1。有些儀器把 Z'' 存成正的，Nyquist 圖會上下顛倒，用這個按鈕修正</td></tr>
+  <tr><td><b>Confirm and Import</b></td><td>確認並匯入</td></tr>
+</table>
+
+<p>匯入後資料會出現在主視窗，畫面上方會顯示 EIS 圖形。程式的資料解析邏輯放在
+<code>DataImportPreprocessor</code>，若你的檔案格式比較特殊，
+原始碼在 <code>pyDRTtools/extensions.py</code>。</p>
+
+<h2>步驟 2 ／ 清理雜訊資料</h2>
+
+<p>
+選單列上有一個獨立的動作 <b>Clean Noise Data</b>（快速鍵 <kbd>Ctrl</kbd>+<kbd>D</kbd>）。
+點下去會開啟「<b>EIS Interactive Data Cleaning Interface</b>」。
+</p>
+
+<p>在 Nyquist 圖上<b>直接點擊要剔除的資料點</b>即可移除，不必回去編輯原始檔。</p>
+
+<table>
+  <tr><th style="width:34%">按鈕</th><th>作用</th></tr>
+  <tr><td><b>&#8617; Undo Last Deletion</b></td><td>復原上一次刪除</td></tr>
+  <tr><td><b>Reset All Changes</b></td><td>還原全部刪除</td></tr>
+  <tr><td><b>Apply Cleaning and Return</b></td><td>套用並回到主視窗</td></tr>
+</table>
+
+<p>視窗上會即時顯示 <code>Current active data points:</code> 目前剩餘點數，方便你確認刪了多少。</p>
+
+<p class="note">
+清理完成後，程式會用 <b>PCHIP 單調內插</b>把資料重新取樣到均勻的對數頻率格點。
+DRT 的數值方法要求頻率格點均勻，所以這一步不是單純的資料刪除，
+而是同時做了重採樣。若你的資料本身已經很均勻乾淨，也可以跳過這一步。
+</p>
+
+<figure class="shot">
+  <a href="assets/screenshots/01-eis-loaded.png"><img src="assets/screenshots/01-eis-loaded.png" alt="匯入 ZARC 範例資料後的主視窗：左側是 DRT 設定區，右側是原始 EIS 的 Nyquist 圖" width="1500" height="950"></a>
+  <figcaption>
+    匯入內附 ZARC 範例資料後的狀態。右側是原始 EIS 的 Nyquist 圖 ——
+    可以看到這是一個<b>壓扁的半圓</b>（圓心落在實軸下方），
+    這正是 CPE 相角 α &lt; 1 的典型特徵。左側是所有 DRT 設定欄位。
+    點圖可看原始尺寸。
+  </figcaption>
+</figure>
+
+<h2>步驟 3 ／ 設定並執行 DRT</h2>
+
+<p>主視窗左側是 DRT 的設定區，右側上方是圖、下方是執行按鈕。設定欄位如下：</p>
+
+<table>
+  <tr><th style="width:30%">欄位</th><th style="width:26%">選項</th><th>說明</th></tr>
+  <tr>
+    <td><b>Method of Discretization</b></td>
+    <td>Gaussian（預設）、C2 Matern、C4 Matern、C6 Matern、Inverse Quadratic、Inverse Quadric、Cauchy、PWL</td>
+    <td>離散化 γ(τ) 用的基底函數（徑向基底）。Gaussian 是最常用的起點；PWL 為分段線性</td>
+  </tr>
+  <tr>
+    <td><b>Data Used</b></td>
+    <td>Combined Re-Im Data（預設）、Re Data、Im Data</td>
+    <td>擬合時使用實部、虛部，或兩者一起。預設兩者合用</td>
+  </tr>
+  <tr>
+    <td><b>Inductance</b></td>
+    <td>Fitting w/o Inductance（預設）、Fitting with Inductance、Discard Inductive Data</td>
+    <td>高頻端的電感行為要一起擬合、忽略，或直接把電感區段的資料丟棄</td>
+  </tr>
+  <tr>
+    <td><b>Regularization Derivative</b></td>
+    <td>1st order（預設）、2nd order</td>
+    <td>正則化項的微分階數，控制 γ(τ) 的平滑程度</td>
+  </tr>
+  <tr>
+    <td><b>Parameter Selection Method</b></td>
+    <td>custom、<b>GCV</b>（程式啟動時預設）、mGCV、rGCV、LC、kf、re-im</td>
+    <td>正則化參數 λ 的決定方式。選 <code>custom</code> 時由下方的欄位手動指定</td>
+  </tr>
+  <tr>
+    <td><b>Regularization parameter</b></td>
+    <td>預設 <code>0.001</code></td>
+    <td>λ 的手動值（僅在 <code>custom</code> 模式使用）</td>
+  </tr>
+  <tr>
+    <td><b>Optimal Regularization parameter</b></td>
+    <td>唯讀</td>
+    <td>程式自動選擇出的 λ，執行後會顯示在這裡</td>
+  </tr>
+  <tr>
+    <td><b>Number of Samples</b></td>
+    <td>預設 <code>1000</code></td>
+    <td>貝氏相關方法（Bayesian / BHT）的取樣數</td>
+  </tr>
+  <tr>
+    <td><b>RBF Shape Control</b></td>
+    <td>FWHM Coefficient（預設）、Shape Factor</td>
+    <td>決定基底函數寬度的方式</td>
+  </tr>
+  <tr>
+    <td><b>FWHM Control</b></td>
+    <td>預設 <code>0.5</code></td>
+    <td>基底函數的寬度係數。調大＝更平滑，調小＝解析度更高但更容易出現振盪</td>
+  </tr>
+</table>
+
+<p>設定好之後，右下方有三種 DRT 演算法可以執行，各自有一個 <b>Run</b> 按鈕：</p>
+
+<table>
+  <tr><th style="width:30%">按鈕</th><th>方法</th></tr>
+  <tr><td><b>Simple Run</b></td><td>脊回歸／Tikhonov 正則化。最快，一般情況先用這個</td></tr>
+  <tr><td><b>Bayesian Run</b></td><td>貝氏正則化，同時估計雜訊與正則化的超參數</td></tr>
+  <tr><td><b>Hilbert Transform</b></td><td>BHT（Bayesian Hilbert Transform），利用 Kramers-Kronig 關係的變體</td></tr>
+</table>
+
+<h2>步驟 4 ／ 檢視 DRT 結果</h2>
+
+<p>主視窗右側有一排顯示按鈕，用來切換要看哪張圖：</p>
+
+<table>
+  <tr><th style="width:30%">按鈕</th><th>圖形內容</th></tr>
+  <tr><td><b>EIS Data</b></td><td>原始 EIS 資料的 Nyquist 圖</td></tr>
+  <tr><td><b>Magnitude</b></td><td>Bode 圖的阻抗大小 |Z|</td></tr>
+  <tr><td><b>Phase</b></td><td>Bode 圖的相位角</td></tr>
+  <tr><td><b>Re Part</b></td><td>實部對頻率</td></tr>
+  <tr><td><b>Im Part</b></td><td>虛部對頻率</td></tr>
+  <tr><td><b>Re Residual</b></td><td>實部殘差（實驗值 &minus; 擬合值）</td></tr>
+  <tr><td><b>Im Residual</b></td><td>虛部殘差</td></tr>
+  <tr><td><b>DRT</b></td><td><b>γ(τ) 分布</b>，也就是下一步要分解的目標</td></tr>
+  <tr><td><b>EIS Score</b></td><td>各方法的配適評分，用來比較不同設定的好壞</td></tr>
+</table>
+
+<p class="ok">
+<b>判斷品質的訣竅</b>：殘差應該在零附近隨機散布，不該有系統性的彎曲。
+若殘差有明顯結構，通常代表峰的數量不足、正則化參數 λ 不合適，
+或高頻電感沒有處理好。
+</p>
+
+<figure class="shot">
+  <a href="assets/screenshots/02-drt-result.png"><img src="assets/screenshots/02-drt-result.png" alt="按 DRT 按鈕後顯示 γ(τ) 的單一鬆弛峰" width="1500" height="950"></a>
+  <figcaption>
+    執行 <b>Simple Run</b>（Parameter Selection Method 為 GCV）之後的 DRT 結果。
+    這筆資料只有一個明顯的鬆弛峰，因此下一步用 1 到 2 個峰去分解就足夠了。
+  </figcaption>
+</figure>
+
+<h2>步驟 5 ／ Stage 2：高斯峰分解</h2>
+
+<p>
+在 <b>Peak deconvolution</b> 區塊填入 <b>Number of peaks</b>（預設 <code>3</code>），
+再按藍色的 <b>Launch Stage 2 (Peak Analysis)</b>，開啟
+「<b>Stage 2: DRT Peak Fitting (DRTxECM)</b>」視窗。
+</p>
+
+<p>這個視窗會對上一步得到的 γ(τ) 做<b>多高斯峰擬合</b>，
+把連續的分布拆成數個離散的峰：</p>
+
+<div class="formula">γ(ln τ) &asymp; &Sigma;<sub>i</sub> A<sub>i</sub> · exp( &minus;(ln τ &minus; &mu;<sub>i</sub>)<sup>2</sup> / (2 &sigma;<sub>i</sub><sup>2</sup>) )</div>
+
+<table>
+  <tr><th style="width:44%">按鈕</th><th>作用</th></tr>
+  <tr><td><b>View Initial Guess (Plot Guess)</b></td><td>先看程式自動產生的初始猜測，不進行優化</td></tr>
+  <tr><td><b>Execute Gaussian Fit</b></td><td>執行多高斯擬合</td></tr>
+  <tr><td><b>Export Stage 2 Decomposition Report (.csv)</b></td><td>匯出分解報告：每個峰的參數，以及各峰的擬合曲線取樣點</td></tr>
+  <tr><td><b>Export to Stage 3 (CPE Fine-Tuning)</b></td><td>把峰參數換算成 R//CPE 初始值並開啟第三階段</td></tr>
+</table>
+
+<h3>峰的參數表</h3>
+
+<p>每個峰有三個欄位，各自帶一個勾選框：</p>
+
+<table>
+  <tr><th style="width:26%">欄位</th><th>意義</th></tr>
+  <tr><td><code>amp</code></td><td>峰的振幅 A<sub>i</sub></td></tr>
+  <tr><td><code>cen</code></td><td>峰中心位置 &mu;<sub>i</sub>（單位是 ln τ）</td></tr>
+  <tr><td><code>wid</code></td><td>峰寬 &sigma;<sub>i</sub>（預設 <code>0.8</code>）</td></tr>
+</table>
+
+<p>
+勾選框＝<b>鎖定該參數</b>（固定不動，不外給任何變化空間）；
+不勾選＝讓擬合自由調整。若你確定某個峰的物理位置，
+把它鎖住可以讓其他峰收斂得更穩定。
+</p>
+
+<figure class="shot">
+  <a href="assets/screenshots/03-stage2-peaks.png"><img src="assets/screenshots/03-stage2-peaks.png" alt="Stage 2 視窗：三個高斯峰的分解結果與參數表" width="1250" height="800"></a>
+  <figcaption>
+    按 <b>Execute Gaussian Fit</b> 之後的結果。左側表格是三個峰的
+    振幅 <code>amp</code>、位置 <code>cen</code>、寬度 <code>wid</code>，
+    右側黑色點是 DRT 原始資料、紅線是三峰總和、彩色虛線是個別峰。
+    左上角同時顯示第一階段解出的 <code>R_ohm</code>（本範例為 10.014 Ω）。
+  </figcaption>
+</figure>
+
+<h2>步驟 6 ／ Stage 3：等效電路 CNLS 擬合</h2>
+
+<p>按 <b>Export to Stage 3 (CPE Fine-Tuning)</b> 後會開啟
+「<b>Stage 3: ECM Fine-Tune Panel (DRTxECM)</b>」。</p>
+
+<h3>峰參數如何變成電路初始值</h3>
+
+<p>程式自動做以下的換算（每個高斯峰對應一個 R//CPE 分支）：</p>
+
+<div class="formula">
+R = A · &sigma; · &radic;(2&pi;)<br>
+&tau; = exp(&mu;)<br>
+Q = &tau; / R<br>
+&alpha; = 1.0（起始值）
+</div>
+
+<p>也就是說，DRT 的峰不只是視覺上的分解，而是直接提供<b>物理上合理的起點</b>。
+這是 DRTxECM 相對一般萬用電路擬合工具最大的優勢之一。</p>
+
+<h3>參數表</h3>
+
+<p>左側表格的欄位是 <b>Element ｜ Freedom ｜ Value ｜ Error ｜ Error%</b>：</p>
+
+<table>
+  <tr><th style="width:26%">Element</th><th>對應的電路元件</th></tr>
+  <tr><td><code>R_ohm</code></td><td>串聯的歐姆電阻 R<sub>0</sub>（高頻截距）</td></tr>
+  <tr><td><code>L_ind</code></td><td>串聯電感 L</td></tr>
+  <tr><td><code>R_i</code></td><td>第 i 個分支的電阻</td></tr>
+  <tr><td><code>Q_i</code></td><td>第 i 個分支的 CPE 參數 Q</td></tr>
+  <tr><td><code>n_i</code></td><td>第 i 個分支的 <b>CPE 相角 &alpha;</b>（0.2 到 1.0 或 1.05）</td></tr>
+</table>
+
+<p><b>Freedom</b> 欄決定每個參數在優化過程中的自由度。
+不同元件能選的模式不一樣（以下是介面上的原文）：</p>
+
+<table>
+  <tr><th style="width:20%">元件</th><th style="width:32%">可選模式</th><th>允許範圍</th></tr>
+  <tr>
+    <td><code>R_i</code>、<code>Q_i</code></td>
+    <td><code>Free</code>、<code>Free +-5%</code>、<code>Free +-10%</code>、<code>Fixed</code></td>
+    <td><code>Free</code>：0 到 &infin;；<code>Free +-5%</code> / <code>Free +-10%</code>：目前值的 &plusmn;5% / &plusmn;10%；<code>Fixed</code>：鎖住</td>
+  </tr>
+  <tr>
+    <td><code>n_i</code>（即 &alpha;）</td>
+    <td><code>Free</code>、<code>&lt;= 1</code>、<code>Fixed</code></td>
+    <td><code>&lt;= 1</code>：<b>0.2 到 1.0</b>；<code>Free</code>：<b>0.2 到 1.05</b>；<code>Fixed</code>：鎖住</td>
+  </tr>
+  <tr>
+    <td><code>L_ind</code></td>
+    <td><code>Free</code>、<code>Fixed</code></td>
+    <td><code>Free</code>：&minus;&infin; 到 &infin;；<code>Fixed</code>：鎖住</td>
+  </tr>
+</table>
+
+<p class="note">
+R、Q、L 的預設都是 <code>Fixed</code>，&alpha; 的預設是 <code>&lt;= 1</code>，
+所以剛進到第三階段時，<b>只有三個 &alpha; 是可以被優化的</b>。
+建議的順序是：先讓 &alpha; 收斂，再逐一放開 R 與 Q。
+</p>
+
+<p class="note">
+正式文獻上 CPE 的 &alpha; 理論上限是 1（理想電容）。程式另外提供容許到 1.05 的模式，
+是為了吸收量測誤差與等效串聯電阻的偏差，讓擬合不會被硬邊界卡住。
+若你要報表上的 &alpha; 嚴格符合物理定義，請用 <code>&lt;= 1</code>。
+</p>
+
+<h3>執行擬合</h3>
+
+<ol>
+  <li>先按 <b>Simulation</b>，用目前的參數值畫出模擬曲線，確認起始狀態合理</li>
+  <li>按綠色的 <b>Fitting (Optimize Parameters)</b> 執行 CNLS 優化</li>
+  <li>收斂後 Value 欄會更新為最佳值，Error 與 Error% 欄顯示估計的標準誤</li>
+  <li>右側的 Nyquist 圖與 Bode 圖會同步更新，各分支以不同顏色顯示</li>
+</ol>
+
+<p>
+視窗下方會顯示 <code>Complex Impedance RMSE</code>，
+Fitting 之後更新為帶單位的 RMSE 值。
+</p>
+
+<figure class="shot">
+  <a href="assets/screenshots/04-stage3-ecm.png"><img src="assets/screenshots/04-stage3-ecm.png" alt="Stage 3 擬合後的參數表與分支解析的 Nyquist、Bode 圖" width="1500" height="900"></a>
+  <figcaption>
+    以三個分支、R 與 Q 設為 <code>Free +-10%</code>、α 設為 <code>&lt;= 1</code> 執行 Fitting 的結果。
+    注意 <code>Error%</code> 欄：這個範例用三個分支去擬合單一 ZARC 半圓，屬於過度參數化，
+    所以標準誤很大。實務上峰數應該配合 DRT 曲線上的實際峰數，不要為了降低 RMSE 而增加分支。
+  </figcaption>
+</figure>
+
+<h2>步驟 7 ／ 匯出結果</h2>
+
+<table>
+  <tr><th style="width:26%">位置</th><th style="width:30%">按鈕</th><th>匯出內容</th></tr>
+  <tr><td>主視窗 <b>Export</b> 區</td><td><b>DRT</b> → Export</td><td>DRT 的 γ(τ) 結果（頻率、τ、γ）</td></tr>
+  <tr><td>主視窗 <b>Export</b> 區</td><td><b>EIS Regression</b> → Export</td><td>EIS 的擬合值與殘差</td></tr>
+  <tr><td>主視窗 <b>Export</b> 區</td><td><b>Figure</b> → Save</td><td>目前顯示的圖檔</td></tr>
+  <tr><td>Stage 2</td><td><b>Export Stage 2 Decomposition Report (.csv)</b></td><td>峰參數與各峰的分解曲線</td></tr>
+  <tr><td>Stage 3</td><td><b>Export Datasheet (.csv)</b></td><td>電路參數、標準誤、以及擬合後的合成報表</td></tr>
+</table>
+
+<h2>疑難排解</h2>
+
+<h3>按 Clean Noise Data 卻說沒有資料</h3>
+<p>會出現 <code>No EIS data loaded!</code> 的警告。請先按 <b>Import</b> 匯入資料。</p>
+
+<h3>DRT 曲線出現負值或劇烈振盪</h3>
+<p>
+通常是正則化不足（λ 太小）或 FWHM Control 太小。可以：
+把 <b>Parameter Selection Method</b> 維持在 GCV 讓程式自動選 λ；
+把 <b>FWHM Control</b> 調大；或改用 <b>Bayesian Run</b>。
+</p>
+
+<h3>擬合不收斂</h3>
+<p>
+常見原因是初始值離真實值太遠。建議的順序是：
+先用 Stage 2 得到好的初始猜測 → 進 Stage 3 後<b>逐一放開參數</b>，
+不要一次把所有參數設成 <code>free</code>。實務上先放開 R 與 Q，
+收斂後再放開 &alpha;，會穩定得多。
+</p>
+
+<h3>α 停在 0.2 或 1.0</h3>
+<p>
+代表最佳解落在邊界上。若停在 1.0，可能是該分支其實接近理想電容，
+或資料品質不足以支撐 &alpha; 的自由擬合；
+若停在 0.2，通常是該分支的頻率範圍太窄或點數太少。
+可以檢查該分支在 Nyquist 圖上的覆蓋範圍。
+</p>
+
+<h3>Error% 顯示 <code>N/A</code> 或 <code>&lt;15%</code></h3>
+<p>
+不確定度是由反 Hessian 矩陣估計的。若 Hessian 無法取得或不穩定，
+程式會退回顯示 <code>N/A</code>；在部分情況下則以 <code>&lt;15%</code>
+表示粗略的相對誤差上限。這不是錯誤，但代表那組參數的標準誤需要保守看待。
+</p>
+
+<h3>Stage 2 的擬合跑很久</h3>
+<p>
+多高斯擬合最多迭代 10000 次。峰的數量越多越慢。
+建議從 2 到 4 個峰開始，確認 γ(τ) 的形狀之後再增加。
+</p>
+
+<footer class="site">
+  DRTxECM — DRT 與等效電路建模的開源整合工具 ·
+  <a href="https://github.com/Linch-Lab/DRTxECM/blob/master/LICENSE">MIT License</a><br>
+  <a href="https://github.com/Linch-Lab/DRTxECM">GitHub</a> ·
+  <a href="download.html">下載</a> ·
+  <a href="method.html">方法與原理</a> ·
+  <a href="cite.html">引用與致謝</a> ·
+  <a href="https://github.com/Linch-Lab/DRTxECM/issues">問題回報</a><br>
+  本頁為靜態網頁，不使用 JavaScript、不收集任何資料。
+</footer>
+
+</body>
+</html>

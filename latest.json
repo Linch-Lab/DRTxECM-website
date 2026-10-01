@@ -1,0 +1,6 @@
+{
+  "version": "0.2.0",
+  "url": "https://github.com/Linch-Lab/DRTxECM/releases/latest",
+  "notes": "首個公開發行版本：DRT 解卷積、高斯峰分解、等效電路 CNLS 擬合三階段流程，CPE 相角 α 可自由擬合。",
+  "mandatory": false
+}

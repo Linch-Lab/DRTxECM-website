@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>方法與原理 - DRTxECM</title>
+<meta name="description" content="DRTxECM 的三階段方法：DRT 解卷積與 Tikhonov 正則化、高斯峰分解與 R//CPE 初始值換算、等效電路 CNLS 擬合與參數不確定度估計。">
+<link rel="canonical" href="https://drtxecm.billlinch.com/method.html">
+<link rel="alternate" hreflang="zh-Hant" href="https://drtxecm.billlinch.com/method.html">
+<link rel="alternate" hreflang="en" href="https://drtxecm.billlinch.com/en/method.html">
+<link rel="alternate" hreflang="x-default" href="https://drtxecm.billlinch.com/method.html">
+<link rel="icon" href="assets/app.ico">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://drtxecm.billlinch.com/method.html">
+<meta property="og:title" content="方法與原理 - DRTxECM">
+<meta property="og:description" content="DRT 解卷積、高斯峰分解、CNLS 等效電路擬合的數學與實作細節。">
+<meta property="og:image" content="https://drtxecm.billlinch.com/assets/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="site">
+  <p class="brand"><a href="index.html"><img src="assets/logo.svg" alt="DRTxECM" height="30"></a></p>
+  <span class="ver">v0.2.0</span>
+  <span class="spacer"></span>
+  <span class="lang"><a href="en/method.html">English</a></span>
+</header>
+
+<nav class="site">
+  <a href="index.html">首頁</a>
+  <a href="download.html">下載</a>
+  <a href="guide.html">使用說明</a>
+  <a class="here" href="method.html">方法與原理</a>
+  <a href="faq.html">常見問題</a>
+  <a href="cite.html">引用與致謝</a>
+</nav>
+
+<h1>方法與原理</h1>
+<p class="lead">
+這一頁說明 DRTxECM 三個階段各自在解什麼問題、用什麼數值方法，
+以及哪些部分沿用 pyDRTtools、哪些是新增的擴充。
+</p>
+
+<div class="pipe">
+  <div class="step"><b>① DRT 解卷積</b><span>Tikhonov 正則化線性反算</span></div>
+  <div class="arw">&rarr;</div>
+  <div class="step"><b>② 高斯峰分解</b><span>非線性最小平方（多高斯）</span></div>
+  <div class="arw">&rarr;</div>
+  <div class="step"><b>③ CNLS 擬合</b><span>有界非線性優化（L-BFGS-B）</span></div>
+</div>
+
+<h2>第一階段：DRT 解卷積</h2>
+
+<p>
+電化學阻抗頻譜可以寫成鬆弛時間分布的積分形式（DRT，Distribution of Relaxation Times）：
+</p>
+
+<div class="formula">Z(&omega;) = R<sub>&infin;</sub> + &int; γ(ln τ) / (1 + j&omega;τ) &nbsp;d ln τ</div>
+
+<p>
+若高頻端有電感行為，則加上串聯電感項：
+</p>
+
+<div class="formula">Z(&omega;) = R<sub>&infin;</sub> + j&omega;L + &int; γ(ln τ) / (1 + j&omega;τ) &nbsp;d ln τ</div>
+
+<p>
+γ(ln τ) 就是 DRT 的結果。因為 γ 是連續函數、而量測資料有限且有雜訊，
+這個反算問題是<b>病態的（ill-posed）</b>：直接求解會得到劇烈振盪、
+沒有物理意義的解。pyDRTtools 的解法是把 γ 用基底函數離散化，再引入正則化。
+</p>
+
+<h3>離散化與 Tikhonov 正則化</h3>
+
+<p>
+把 γ 用一組基底函數展開 γ(ln τ) = &Sigma;<sub>n</sub> x<sub>n</sub> φ<sub>n</sub>(ln τ)，
+代入積分式之後，問題就變成一個線性系統 <b>A x = b</b>，
+其中 b 是量測到的阻抗（實部與虛部可以串接）。
+此時求解的目標是脊回歸（Tikhonov 正則化）：
+</p>
+
+<div class="formula">min<sub>x</sub> &nbsp; &#8214;A x &minus; b&#8214;<sup>2</sup> + λ &#8214;M x&#8214;<sup>2</sup></div>
+
+<p>
+λ 是正則化參數，M 是由微分階數決定的矩陣。λ 太大會把 γ 抹平、
+失去解析度；λ 太小則會出現振盪的假峰。<b>λ 的選擇是 DRT 分析最關鍵的一步。</b>
+</p>
+
+<table>
+  <tr><th style="width:20%">選項</th><th>說明</th></tr>
+  <tr><td><b>custom</b></td><td>由使用者手動指定 λ</td></tr>
+  <tr><td><b>GCV</b></td><td>一般化交叉驗證（Generalized Cross-Validation）</td></tr>
+  <tr><td><b>mGCV</b></td><td>改良版 GCV</td></tr>
+  <tr><td><b>rGCV</b></td><td>穩健版 GCV</td></tr>
+  <tr><td><b>LC</b></td><td>L-curve 法</td></tr>
+  <tr><td><b>kf</b></td><td>K-fold 交叉驗證</td></tr>
+  <tr><td><b>re-im</b></td><td>實部／虛部交叉驗證</td></tr>
+</table>
+
+<h3>離散化基底</h3>
+
+<table>
+  <tr><th style="width:30%">基底</th><th>特性</th></tr>
+  <tr><td><b>Gaussian</b></td><td>預設，平滑、一般用途最穩定</td></tr>
+  <tr><td><b>C2 Matern</b></td><td rowspan="3">Matern 家族，可調平滑度（C2 → C6 依序越平滑）</td></tr>
+  <tr><td><b>C4 Matern</b></td></tr>
+  <tr><td><b>C6 Matern</b></td></tr>
+  <tr><td><b>Inverse Quadratic</b></td><td>長尾，適合寬廣的鬆弛時間分布</td></tr>
+  <tr><td><b>Inverse Quadric</b></td><td>長尾的另一種形式</td></tr>
+  <tr><td><b>Cauchy</b></td><td>長尾、較不易出現尖峰</td></tr>
+  <tr><td><b>PWL</b></td><td>分段線性，不使用 Toeplitz 加速，計算較慢但限制最少</td></tr>
+</table>
+
+<p>
+基底的寬度由 <b>RBF Shape Control</b> 決定（<code>FWHM Coefficient</code> 或
+<code>Shape Factor</code>），數值由 <b>FWHM Control</b> 指定，預設 <code>0.5</code>。
+這個寬度決定 DRT 的解析度極限。
+</p>
+
+<h3>其他 DRT 演算法</h3>
+
+<table>
+  <tr><th style="width:30%">方法</th><th>原理</th></tr>
+  <tr>
+    <td><b>Simple Run</b></td>
+    <td>Tikhonov／脊回歸（上述方法），以最佳化求解。<code>Parameter Selection Method</code> 決定 λ</td>
+  </tr>
+  <tr>
+    <td><b>Bayesian Run</b></td>
+    <td>貝氏正則化：把雜訊變異數與正則化超參數當成待推論的未知數，以後驗分布取樣求解</td>
+  </tr>
+  <tr>
+    <td><b>Hilbert Transform</b></td>
+    <td>BHT（Bayesian Hilbert Transform）：利用 Kramers-Kronig 關係連結實部與虛部，再用貝氏架構求解</td>
+  </tr>
+</table>
+
+<p class="note">
+套件中也包含 GP-DRT（<code>fGP.py</code>，高斯過程）與 HMC（<code>HMC.py</code>，
+Hamiltonian Monte Carlo）的實作，但目前圖形介面未提供對應按鈕，
+可用 Python API 直接呼叫。以上所有 DRT 計算都<b>沿用 pyDRTtools 原始程式碼</b>，
+DRTxECM 未做修改。
+</p>
+
+<h2>第二階段：高斯峰分解</h2>
+
+<p>
+DRT 得到的 γ(ln τ) 是一條連續曲線，但實際的物理系統通常由有限個
+鬆弛過程組成。第二階段用<b>多個高斯函數</b>去擬合這條曲線：
+</p>
+
+<div class="formula">γ(ln τ) &asymp; &Sigma;<sub>i</sub> A<sub>i</sub> · exp( &minus;(ln τ &minus; &mu;<sub>i</sub>)<sup>2</sup> / (2 &sigma;<sub>i</sub><sup>2</sup>) )</div>
+
+<p>
+這是非線性最小平方問題，以 <code>scipy.optimize.curve_fit</code> 求解，
+迭代上限 10000 次。峰數由使用者指定（介面上的 <b>Number of peaks</b>），
+你可以在擬合後手動微調任一個峰的振幅、位置與寬度。
+</p>
+
+<h3>從峰到電路初始值</h3>
+
+<p>
+這是第二階段與第三階段之間的橋樑。每個高斯峰對應一個 R//CPE 分支，
+換算方式如下（實作於 <code>Stage2Window.export_to_stage3</code>）：
+</p>
+
+<table>
+  <tr><th style="width:34%">電路參數</th><th>由峰參數換算</th></tr>
+  <tr><td>電阻 <b>R</b></td><td><code>R = A · &sigma; · &radic;(2&pi;)</code></td></tr>
+  <tr><td>時間常數 <b>&tau;</b></td><td><code>&tau; = exp(&mu;)</code></td></tr>
+  <tr><td>CPE 參數 <b>Q</b></td><td><code>Q = &tau; / R</code></td></tr>
+  <tr><td>相角 <b>&alpha;</b></td><td><code>&alpha; = 1.0</code>（起始值，之後才由擬合決定）</td></tr>
+</table>
+
+<p>
+換算的道理是：<code>A·&sigma;·&radic;(2&pi;)</code> 是高斯函數在 ln τ 軸上的面積，
+對應到該鬆弛過程貢獻的總電阻 R；而當 &alpha; = 1 時，
+R//CPE 分支的時間常數正好是 &tau; = R·Q，所以 Q 由 &tau; 與 R 反推。
+峰的中心位置 &mu; 是 ln τ，取指數就得回 &tau;。
+</p>
+
+<p class="ok">
+這就是「<b>DRT 啟發的初始猜測</b>」：起始值不是隨機亂猜，
+而是由資料本身的鬆弛時間結構推導出來的，因此能大幅降低
+非線性擬合落入局部極小值的機會。
+</p>
+
+<h2>第三階段：CNLS 等效電路擬合</h2>
+
+<h3>電路模型</h3>
+
+<p>DRTxECM 使用的等效電路是串聯的 LR<sub>0</sub> + &Sigma;(R<sub>i</sub>//CPE<sub>i</sub>)：</p>
+
+<div class="formula">Z(&omega;) = R<sub>0</sub> + j&omega;L + &Sigma;<sub>i</sub> &nbsp; 1 / ( 1/R<sub>i</sub> + Q<sub>i</sub>(j&omega;)<sup>&alpha;<sub>i</sub></sup> )</div>
+
+<p>其中單一 CPE 的阻抗是：</p>
+
+<div class="formula">Z<sub>CPE</sub> = 1 / ( Q (j&omega;)<sup>&alpha;</sup> )</div>
+
+<p>
+當 &alpha; = 1 時，Q 就退化成理想電容 C，該分支成為標準的 RC 半圓；
+當 &alpha; &lt; 1 時，Nyquist 圖上的半圓會被壓扁、圓心落到實軸下方。
+<b>壓扁的程度直接對應 &alpha; 的大小</b>，這也是本網站標誌造型的由來。
+</p>
+
+<h3>目標函數與優化</h3>
+
+<p>擬合是對複數阻抗的實部與虛部同時做最小平方（CNLS，Complex Nonlinear Least Squares）：</p>
+
+<div class="formula">&chi;<sup>2</sup>(x) = &Sigma;<sub>k</sub> [ ( Re Z<sub>exp,k</sub> &minus; Re Z<sub>sim,k</sub> )<sup>2</sup> + ( Im Z<sub>exp,k</sub> &minus; Im Z<sub>sim,k</sub> )<sup>2</sup> ]</div>
+
+<p>
+優化器是 <code>scipy.optimize.minimize</code> 的 <b>L-BFGS-B</b>（有限記憶體
+準牛頓法，支援參數上下界），收斂容差設定為 <code>ftol = gtol = 1e-12</code>。
+</p>
+
+<table>
+  <tr><th style="width:22%">參數</th><th style="width:30%">可選模式</th><th>對應的邊界</th></tr>
+  <tr>
+    <td><b>R</b>、<b>Q</b></td>
+    <td><code>Free</code>、<code>Free +-5%</code>、<code>Free +-10%</code>、<code>Fixed</code></td>
+    <td><code>Free</code> → [0, &infin;)；<code>Free +-5%</code> → 目前值的 &plusmn;5%；<code>Free +-10%</code> → 目前值的 &plusmn;10%；<code>Fixed</code> → 不列入優化變數</td>
+  </tr>
+  <tr>
+    <td><b>&alpha;</b>（<code>n_i</code>）</td>
+    <td><code>Free</code>、<code>&lt;= 1</code>、<code>Fixed</code></td>
+    <td><code>&lt;= 1</code> → [0.2, 1.0]；<code>Free</code> → [0.2, 1.05]；<code>Fixed</code> → 不列入優化變數</td>
+  </tr>
+  <tr>
+    <td><b>L</b></td>
+    <td><code>Free</code>、<code>Fixed</code></td>
+    <td><code>Free</code> → (&minus;&infin;, &infin;)；<code>Fixed</code> → 不列入優化變數</td>
+  </tr>
+</table>
+
+<p>
+被設為 <code>Fixed</code> 的參數不會進入優化變數向量，因此也不計入自由度 p。
+介面上的預設值是：R、Q、L 為 <code>Fixed</code>，&alpha; 為 <code>&lt;= 1</code>。
+</p>
+
+<h3>參數不確定度</h3>
+
+<p>
+優化收斂後，程式計算自由度與均方誤差，再由反 Hessian 矩陣估計共變異數：
+</p>
+
+<div class="formula">
+dof = 2N &minus; p &nbsp;&nbsp;（N 為頻率點數，p 為被優化的參數個數）<br>
+mse = &chi;<sup>2</sup> / dof<br>
+cov = H<sup>&minus;1</sup> &middot; mse<br>
+Error<sub>j</sub> = &radic;( cov<sub>jj</sub> )
+</div>
+
+<p>
+L-BFGS-B 回傳的反 Hessian 是 <code>LinearOperator</code> 形式，
+程式會轉成稠密矩陣後再計算。若無法取得，則退回以數值 Jacobian 近似。
+這就是 Stage 3 參數表中 <b>Error</b> 與 <b>Error%</b> 兩欄的來源。
+</p>
+
+<h2>為什麼要把 CPE 相角 &alpha; 當成自由參數</h2>
+
+<p>
+這是 DRTxECM 最重要的設計決定。現實中的電極表面粗糙、反應不均勻，
+CPE 的 &alpha; 通常明顯小於 1（常見落在 0.7 到 0.95 之間）。
+但許多商業等效電路軟體為了收斂穩定，會把 &alpha; 固定成 1，
+或限制在很窄的範圍內。
+</p>
+
+<p>這麼做會有兩個後果：</p>
+
+<ul>
+  <li>擬合誤差被<b>轉嫁</b>到 R 與 Q 上，讓這兩個參數偏離真實值</li>
+  <li>報表上看起來「很理想」，但實際上掩蓋了電極的真實物理狀態</li>
+</ul>
+
+<p>
+DRTxECM 讓 &alpha; 與 R、Q 一起被優化，因此你能分辨
+「這個分支真的接近理想電容」與「這個分支是因為被固定才看起來像理想電容」。
+預設邊界 <code>[0.2, 1.0]</code> 涵蓋了文獻中絕大多數 CPE 的實際取值。
+</p>
+
+<h2>DRTxECM 與其他工具的差異</h2>
+
+<table>
+  <tr>
+    <th style="width:24%">能力</th>
+    <th style="width:25%">通用電路擬合軟體</th>
+    <th style="width:25%">pyDRTtools</th>
+    <th>DRTxECM</th>
+  </tr>
+  <tr>
+    <td>DRT 計算</td>
+    <td>無（或需外掛）</td>
+    <td><b>完整</b>（Tikhonov、Bayesian、BHT、GP-DRT）</td>
+    <td>完整（沿用，未修改）</td>
+  </tr>
+  <tr>
+    <td>等效電路擬合</td>
+    <td><b>完整</b></td>
+    <td>無</td>
+    <td><b>有</b>（LR<sub>0</sub> + &Sigma;R//CPE）</td>
+  </tr>
+  <tr>
+    <td>CPE 相角 &alpha;</td>
+    <td>常固定或限制範圍</td>
+    <td>不適用</td>
+    <td><b>自由擬合</b>（0.2–1.05）</td>
+  </tr>
+  <tr>
+    <td>初始值來源</td>
+    <td>手動輸入或隨機</td>
+    <td>不適用</td>
+    <td><b>由 DRT 的峰自動換算</b></td>
+  </tr>
+  <tr>
+    <td>參數不確定度</td>
+    <td>部分有</td>
+    <td>不適用</td>
+    <td>有（反 Hessian 估計）</td>
+  </tr>
+  <tr>
+    <td>授權</td>
+    <td>多為商業授權</td>
+    <td>MIT</td>
+    <td>MIT</td>
+  </tr>
+</table>
+
+<h2>理論基礎與引用</h2>
+
+<p>
+第一階段的 DRT 方法建立在 pyDRTtools 的既有成果上，所有數學推導、
+方程式編號與原始文獻請見 <a href="cite.html">引用與致謝</a>。
+若你要在論文中使用這些結果，請務必引用對應的原始文獻。
+</p>
+
+<footer class="site">
+  DRTxECM — DRT 與等效電路建模的開源整合工具 ·
+  <a href="https://github.com/Linch-Lab/DRTxECM/blob/master/LICENSE">MIT License</a><br>
+  <a href="https://github.com/Linch-Lab/DRTxECM">GitHub</a> ·
+  <a href="download.html">下載</a> ·
+  <a href="method.html">方法與原理</a> ·
+  <a href="cite.html">引用與致謝</a> ·
+  <a href="https://github.com/Linch-Lab/DRTxECM/issues">問題回報</a><br>
+  本頁為靜態網頁，不使用 JavaScript、不收集任何資料。
+</footer>
+
+</body>
+</html>

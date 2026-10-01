@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>常見問題 - DRTxECM</title>
+<meta name="description" content="DRTxECM 常見問題：SmartScreen 警告、資料格式、要選幾個峰、DRT 負值、α 的範圍、與商業軟體的差異、隱私與授權。">
+<link rel="canonical" href="https://drtxecm.billlinch.com/faq.html">
+<link rel="alternate" hreflang="zh-Hant" href="https://drtxecm.billlinch.com/faq.html">
+<link rel="alternate" hreflang="en" href="https://drtxecm.billlinch.com/en/faq.html">
+<link rel="alternate" hreflang="x-default" href="https://drtxecm.billlinch.com/faq.html">
+<link rel="icon" href="assets/app.ico">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://drtxecm.billlinch.com/faq.html">
+<meta property="og:title" content="常見問題 - DRTxECM">
+<meta property="og:description" content="安裝、資料格式、擬合設定與授權的常見問題。">
+<meta property="og:image" content="https://drtxecm.billlinch.com/assets/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="site">
+  <p class="brand"><a href="index.html"><img src="assets/logo.svg" alt="DRTxECM" height="30"></a></p>
+  <span class="ver">v0.2.0</span>
+  <span class="spacer"></span>
+  <span class="lang"><a href="en/faq.html">English</a></span>
+</header>
+
+<nav class="site">
+  <a href="index.html">首頁</a>
+  <a href="download.html">下載</a>
+  <a href="guide.html">使用說明</a>
+  <a href="method.html">方法與原理</a>
+  <a class="here" href="faq.html">常見問題</a>
+  <a href="cite.html">引用與致謝</a>
+</nav>
+
+<h1>常見問題</h1>
+
+<h2>安裝與執行</h2>
+
+<h3>Windows 顯示「不明的發行者」或 SmartScreen 警告？</h3>
+<p>
+因為本專案未購買程式碼簽章憑證。這是<b>所有免費開源軟體的共同情況</b>，並非病毒。
+你可以：點「更多資訊」→「仍要執行」；或<b>自行從原始碼建置</b>，
+以確保執行檔與原始碼一致。也可以到
+<a href="download.html#verify">下載頁</a>用 SHA256 驗證檔案。
+</p>
+
+<h3>需要安裝 Python 嗎？</h3>
+<p>
+不需要。下載的 ZIP 已經包含執行環境（PyQt5 與所有科學計算套件），
+解壓後直接執行 <code>DRTxECM.exe</code> 即可。
+只有想自己從原始碼執行或建置時才需要 Python。
+</p>
+
+<h3>防毒軟體說有毒？</h3>
+<p>
+PyInstaller 打包的執行檔偶爾會被誤判，這是業界常見的假警報。
+本專案的建置流程已刻意關閉 UPX 壓縮以降低誤判率。
+可以先用 SHA256 驗證檔案，或自行從原始碼建置。
+</p>
+
+<h3>支援 macOS / Linux 嗎？</h3>
+<p>
+程式本身是跨平台的 Python 專案（PyQt5 + matplotlib），可以在 macOS 與 Linux 上
+從原始碼執行。但<b>打包好的免安裝版目前只提供 Windows</b>，
+因為打包流程建在 Windows 環境。macOS / Linux 的執行方式見
+<a href="download.html">下載頁</a>的「從原始碼執行」。
+</p>
+
+<h3>第一次啟動很慢？</h3>
+<p>
+正常現象。首次啟動要載入 PyQt5、matplotlib、scipy、scikit-learn 等函式庫，
+依硬碟速度可能需要數秒到十數秒。之後啟動會快一些。
+</p>
+
+<h3>跳出了「找不到 xxx.dll」？</h3>
+<p>
+通常是沒有完整解壓就執行，或解壓過程被中斷。
+請刪除整個資料夾重新解壓，並且<b>不要在 ZIP 壓縮檔內直接雙擊執行</b>。
+</p>
+
+<h2>資料與操作</h2>
+
+<h3>支援什麼資料格式？</h3>
+<p>
+CSV 與 TXT，三欄（頻率、Z'、Z''）。不同儀器的表頭列數不一，
+匯入時會開啟「EIS Data Import Preprocessing Panel」讓你指定要跳過幾列，
+也可以用 <b>Toggle Column 3 (Z'') Sign (* -1)</b> 修正虛部正負號。
+</p>
+
+<h3>資料點數要有多少？</h3>
+<p>
+DRT 是病態的反算問題，點數越多、頻率涵蓋越廣越穩定。
+實務上建議每個數量級至少 8 到 10 個點，整體涵蓋 4 個數量級以上。
+點數太少會讓 γ(τ) 的解析度不足，也會讓 &alpha; 的自由擬合失去意義。
+</p>
+
+<h3>一定要做資料清理嗎？</h3>
+<p>
+不一定，但強烈建議。單一離群點會在 DRT 上產生整片假峰，
+後續的高斯分解與電路擬合都會被帶偏。用 <b>Clean Noise Data</b>
+（<kbd>Ctrl</kbd>+<kbd>D</kbd>）在圖上點掉它們，成本很低但效益很大。
+</p>
+
+<h3>可以只做 DRT，不做電路擬合嗎？</h3>
+<p>
+可以。第一階段的 DRT 結果與 pyDRTtools 完全一致，
+你可以只用它、匯出 γ(τ)，完全不進入第二、三階段。
+</p>
+
+<h3>介面是英文的嗎？</h3>
+<p>
+是。圖形介面的文字沿用 pyDRTtools 的原始英文標籤，
+這樣既有 pyDRTtools 使用者不需要重新適應。
+本網站的中文說明會直接引用英文原文，方便對照。
+</p>
+
+<h2>方法與擬合</h2>
+
+<h3>要選幾個峰？</h3>
+<p>
+先看 DRT 的 γ(τ) 有幾個明顯的峰，從那個數量開始。
+峰數太少會讓擬合殘差出現系統性結構；太多則會過度擬合、產生沒有物理意義的分支。
+建議從 2 到 4 個開始，並用 <b>EIS Score</b> 與殘差圖判斷。
+</p>
+
+<h3>DRT 結果出現負值？</h3>
+<p>
+γ(τ) 的負值通常代表<b>正則化不足</b>。可以：把 <b>Parameter Selection Method</b>
+設為 GCV 讓程式自動選 λ、調大 <b>FWHM Control</b>、改用 <b>Bayesian Run</b>，
+或檢查高頻電感是否處理妥當。
+</p>
+
+<h3>α 可以大於 1 嗎？</h3>
+<p>
+理論上不行。CPE 的 &alpha; 定義域是 (0, 1]，&alpha; = 1 即理想電容。
+DRTxECM 預設模式 <code>&lt;= 1</code> 把 &alpha; 限制在 [0.2, 1.0]，
+另外提供一個容許到 <b>1.05</b> 的模式，用來吸收量測誤差與串聯電阻偏差，
+讓擬合不會被硬邊界卡住。要報表上嚴格符合物理定義，請用 <code>&lt;= 1</code>。
+</p>
+
+<h3>擬合不收斂怎麼辦？</h3>
+<p>
+最常見的原因是初始值太遠。建議：先用 Stage 2 得到好的初始猜測，
+進入 Stage 3 後<b>逐一放開參數</b>——先讓 R 與 Q 自由，收斂後再放開 &alpha;。
+一次把所有參數設成 <code>free</code> 通常會失敗。
+</p>
+
+<h3>與 ZView 這類商業軟體差在哪？</h3>
+<p>
+主要差在三點：(1) DRTxECM 內建完整的 DRT 分析，不需要另外做；
+(2) 電路擬合的初始值由 DRT 的峰自動推導，不必手動猜；
+(3) CPE 相角 &alpha; 是可自由擬合的參數，而不是被固定或限制。
+詳細比較見 <a href="method.html">方法與原理</a>。
+</p>
+
+<h3>可以收斂到跟 pyDRTtools 一模一樣的 DRT 結果嗎？</h3>
+<p>
+可以，而且本來就是。DRTxECM 完全沒有修改 pyDRTtools 的 DRT 計算程式碼，
+相同的資料與設定會得到相同的 γ(τ)。
+</p>
+
+<h2>費用、隱私與授權</h2>
+
+<h3>需要付費嗎？</h3>
+<p>
+完全免費開源（MIT）。沒有廣告、沒有追蹤、沒有付費版本、沒有功能分級。
+</p>
+
+<h3>資料會被上傳嗎？</h3>
+<p>
+<b>不會。</b>所有運算——包括 DRT、高斯分解與電路擬合——都在你的電腦上執行。
+程式不含任何網路請求、不含任何統計上報。你可以完全拔掉網路使用。
+</p>
+
+<h3>可以拿來做商業用途嗎？</h3>
+<p>
+可以。MIT 授權允許自由使用、修改、散布，包含商業用途。
+唯一的條件是保留著作權聲明。
+</p>
+
+<h3>在論文裡要怎麼引用？</h3>
+<p>
+若你使用了 DRT 的計算結果，<b>必須引用 pyDRTtools 的原始文獻</b>。
+DRTxECM 本身的引用方式與完整文獻清單整理在
+<a href="cite.html">引用與致謝</a>。
+</p>
+
+<h2>其他</h2>
+
+<h3>發現 bug 或想許願新功能？</h3>
+<p>
+歡迎到 <a href="https://github.com/Linch-Lab/DRTxECM/issues">GitHub Issues</a> 回報。
+回報時請附上 Windows 版本、DRTxECM 版本，以及你使用的 DRT 設定
+（離散化基底、Data Used、正則化參數等），會更容易重現問題。
+</p>
+
+<h3>可以貢獻程式碼嗎？</h3>
+<p>
+歡迎。專案是 MIT 授權，Pull Request 與 Issue 都開放。
+若你修改了 <code>pyDRTtools/</code> 底下的原始 DRT 程式碼，
+請留意 <code>extensions.py</code> 與 <code>layout.py</code> 是 DRTxECM 的擴充部分，
+其餘檔案是 pyDRTtools 的原始內容。
+</p>
+
+<footer class="site">
+  DRTxECM — DRT 與等效電路建模的開源整合工具 ·
+  <a href="https://github.com/Linch-Lab/DRTxECM/blob/master/LICENSE">MIT License</a><br>
+  <a href="https://github.com/Linch-Lab/DRTxECM">GitHub</a> ·
+  <a href="download.html">下載</a> ·
+  <a href="method.html">方法與原理</a> ·
+  <a href="cite.html">引用與致謝</a> ·
+  <a href="https://github.com/Linch-Lab/DRTxECM/issues">問題回報</a><br>
+  本頁為靜態網頁，不使用 JavaScript、不收集任何資料。
+</footer>
+
+</body>
+</html>
