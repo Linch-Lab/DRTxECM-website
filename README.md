@@ -34,6 +34,7 @@ DRTxECM-website/                 ← 倉庫根目錄 = 網站根目錄
 ├── faq.html                     常見問題
 ├── cite.html                    引用與致謝
 ├── 404.html
+├── favicon.ico                  網站圖示（瀏覽器會直接請求這個路徑）
 ├── .htaccess                    Apache 設定（Hostinger / cPanel）
 ├── robots.txt
 ├── sitemap.xml                  12 頁 + hreflang
@@ -50,9 +51,11 @@ DRTxECM-website/                 ← 倉庫根目錄 = 網站根目錄
 │   ├── logo.svg                 頁首標誌（淺色底）
 │   ├── logo-white.svg           深色底版本
 │   ├── logo-mark.svg            只有圖標
-│   ├── app.ico                  分頁圖示（favicon）
-│   ├── apple-touch-icon.png
+│   ├── app.ico                  應用程式圖示（同步到應用程式倉庫）
+│   ├── favicon-96.png           分頁／搜尋結果的網站圖示（96x96）
+│   ├── apple-touch-icon.png     加到主畫面
 │   ├── og-image.png             社群分享預覽（1200x630）
+│   ├── twqr-donate.jpg          贊助頁的 TWQR 台灣Pay 收款碼
 │   ├── screenshots/             真實介面截圖（四張）
 │   └── README.txt
 ├── tools/
@@ -63,6 +66,23 @@ DRTxECM-website/                 ← 倉庫根目錄 = 網站根目錄
 ├── .gitignore
 └── README.md / 部署網站.md
 ```
+
+### 網站圖示（分頁與搜尋結果）
+
+標誌的圖標就是網站圖示，三個路徑在所有頁面都以**站根絕對路徑**引用
+（與姊妹專案 LinLingo 一致），這樣 `/en/` 底下的頁面不必改寫成
+`../assets/`，搜尋引擎在任何頁面也都解析到同一個圖示：
+
+```html
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon-96.png">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+```
+
+`favicon-96.png` 選 96 是因為 Google 要求搜尋結果的 favicon 必須是
+正方形、且邊長為 48 的倍數。`favicon.ico` 與 `app.ico` 是同一份多尺寸
+圖示（16/24/32/48/64/128/256），應用程式倉庫的 `assets/DRTxECM.ico`
+也是同一份，所以程式圖示與網站圖示永遠一致。
 
 ---
 

@@ -102,6 +102,12 @@ figure.shot { margin: 18px 0; }
 figure.shot img { max-width: 100%; height: auto; border: 1px solid #dcdcdc; border-radius: 4px; display: block; }
 figure.shot figcaption { color: #666; font-size: 14px; margin-top: 6px; }
 
+/* ---- 贊助 QR ---- */
+.qr {
+  width: 200px; height: 200px; border: 1px solid #ddd; background: #fafafa;
+  border-radius: 4px;
+}
+
 /* ---- 頁尾 ---- */
 footer.site {
   margin-top: 60px; padding-top: 14px; border-top: 1px solid #ddd;

@@ -49,6 +49,17 @@ SCREENSHOTS = ["01-eis-loaded.png", "02-drt-result.png",
                "03-stage2-peaks.png", "04-stage3-ecm.png"]
 EXTRA_PAGES = ["404.html"]
 
+# 網站圖示（分頁與搜尋結果）與贊助 QR。這些以前都出現過少檔或路徑寫錯的
+# 情況，所以獨立檢查：檔案要在、每一頁都要用站根絕對路徑引用。
+ICON_FILES = [("favicon.ico", "favicon at the site root"),
+              ("assets/favicon-96.png", "96x96 PNG favicon"),
+              ("assets/apple-touch-icon.png", "apple-touch-icon")]
+ICON_LINKS = ['href="/favicon.ico"', 'href="/assets/favicon-96.png"',
+              'href="/assets/apple-touch-icon.png"']
+QR_FILE = "assets/twqr-donate.jpg"
+QR_LINK = 'src="/assets/twqr-donate.jpg"'
+QR_PAGES = ["cite.html", "en/cite.html"]
+
 fails, oks = [], []
 
 
@@ -322,6 +333,44 @@ def check_screenshots(pages):
         O(f"{len(SCREENSHOTS)} screenshots present, referenced {used} times")
 
 
+def check_icons_and_qr(pages):
+    """分頁／搜尋結果的圖示，以及贊助 QR。"""
+    bad = False
+
+    for relpath, label in ICON_FILES:
+        if not os.path.exists(os.path.join(SITE, relpath.replace("/", os.sep))):
+            F(f"missing {label} ({relpath})")
+            bad = True
+    if not os.path.exists(os.path.join(SITE, QR_FILE.replace("/", os.sep))):
+        F(f"missing sponsor QR ({QR_FILE})")
+        bad = True
+
+    for page in pages:
+        name = rel(page)
+        html = read(page)
+        for needle in ICON_LINKS:
+            if needle not in html:
+                F(f"{name}: missing {needle}")
+                bad = True
+        # 舊寫法（相對路徑的 app.ico）不該再出現
+        if "assets/app.ico" in html:
+            F(f"{name}: still references the old assets/app.ico")
+            bad = True
+
+    for name in QR_PAGES:
+        path = os.path.join(SITE, name.replace("/", os.sep))
+        if not os.path.exists(path):
+            F(f"missing page {name}")
+            bad = True
+            continue
+        if QR_LINK not in read(path):
+            F(f"{name}: the sponsor QR image is not referenced")
+            bad = True
+
+    if not bad:
+        O("favicon trio present and referenced on every page; sponsor QR wired up")
+
+
 def check_app_repo():
     """應用程式倉庫的打包檔案是否齊全（找不到就跳過）。"""
     if not os.path.isdir(APP_REPO):
@@ -364,6 +413,7 @@ def main():
     check_og_image(pages)
     check_tag_balance(pages)
     check_screenshots(pages)
+    check_icons_and_qr(pages)
     check_app_repo()
 
     print()
