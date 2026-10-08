@@ -21,7 +21,7 @@ Python 版  https://github.com/Linch-Lab/DRTxECM/releases/latest/download/DRTxEC
 
 | | 免安裝版 | Python 版 |
 |---|---|---|
-| 大小 | 約 126 MB | 約 2.6 MB |
+| 大小 | 約 126 MB | 約 1.8 MB |
 | 需要 Python | 不需要 | 3.10 或 3.11 |
 | 第一次啟動 | 解壓即用 | 需下載約 150 MB 套件 |
 | 電腦阻擋未簽章程式時 | 可能被擋 | 通常可以（`python.exe` 有簽章） |
