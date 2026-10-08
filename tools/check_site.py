@@ -380,6 +380,8 @@ def check_app_repo():
               "packaging/requirements-build.txt",
               "packaging/README.md", "releases/README.md",
               "assets/DRTxECM.ico",
+              "packaging/extras/診斷.cmd",
+              "packaging/extras/使用前必讀.txt",
               ".github/workflows/release.yml"]
     bad = False
     for item in wanted:
