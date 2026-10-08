@@ -39,14 +39,65 @@
 </nav>
 
 <h1>Download</h1>
-<p class="lead">Current version <b>v0.2.0</b> ｜ Windows 10 / 11 (64-bit)</p>
+<p class="lead">Current version <b>v0.2.0</b> ｜ Windows 10 / 11 (64-bit) ｜ two editions</p>
+
+<h2>Which one?</h2>
+
+<table>
+  <tr>
+    <th style="width:26%"></th>
+    <th style="width:37%">Portable edition (recommended)</th>
+    <th>Python edition</th>
+  </tr>
+  <tr>
+    <td>Download size</td>
+    <td>about 126&nbsp;MB</td>
+    <td><b>about 2.6&nbsp;MB</b></td>
+  </tr>
+  <tr>
+    <td>Needs Python</td>
+    <td>no</td>
+    <td>yes, <b>3.10 or 3.11</b></td>
+  </tr>
+  <tr>
+    <td>First start</td>
+    <td>unzip and run</td>
+    <td>downloads about 150&nbsp;MB of libraries (needs internet, takes minutes)</td>
+  </tr>
+  <tr>
+    <td>Machine blocks unsigned executables</td>
+    <td>may be blocked</td>
+    <td><b>usually works</b> (<code>python.exe</code> is signed)</td>
+  </tr>
+  <tr>
+    <td>School blocks PyPI</td>
+    <td><b>works</b> (no libraries to download)</td>
+    <td>cannot install the libraries</td>
+  </tr>
+  <tr>
+    <td>Best for</td>
+    <td>almost everyone</td>
+    <td>people who already have Python, or whose policy blocks the portable build</td>
+  </tr>
+</table>
+
+<h2>Downloads</h2>
 
 <div class="dl">
-  <a class="big" href="https://github.com/Linch-Lab/DRTxECM/releases/latest/download/DRTxECM-win64.zip">Download DRTxECM-win64.zip</a>
+  <a class="big" href="https://github.com/Linch-Lab/DRTxECM/releases/latest/download/DRTxECM-win64.zip">Download the portable edition (DRTxECM-win64.zip)</a>
   <div class="meta">
     Portable ｜ Unzip and run ｜ No Python installation required<br>
     About <b>126&nbsp;MB</b> to download, roughly <b>334&nbsp;MB</b> once extracted (about 1,430 files)<br>
     Clicking the button starts the download immediately; if your browser does nothing, see <a href="#trouble">download troubleshooting</a> below
+  </div>
+</div>
+
+<div class="dl">
+  <a class="big" href="https://github.com/Linch-Lab/DRTxECM/releases/latest/download/DRTxECM-python.zip">Download the Python edition (DRTxECM-python.zip)</a>
+  <div class="meta">
+    Needs Python <b>3.10 or 3.11</b> ｜ only about <b>2.6&nbsp;MB</b> to download<br>
+    Unzip and double-click <code>START-HERE.bat</code>; the first start creates the environment and installs the libraries<br>
+    For when a company or school policy blocks the portable build
   </div>
 </div>
 
@@ -59,11 +110,17 @@
   </tr>
   <tr>
     <td><b>DRTxECM-win64.zip</b></td>
-    <td>The main application. Unzip it and run <code>DRTxECM.exe</code>; no installation is needed.</td>
+    <td>The portable application. Unzip it and run <code>DRTxECM.exe</code>; no Python needed.</td>
+  </tr>
+  <tr>
+    <td><b>DRTxECM-python.zip</b></td>
+    <td>The Python edition: source code, example data, tutorial notebooks and the manual,
+      plus a Chinese <code>READ-ME-FIRST.txt</code> and the <code>START-HERE.bat</code> launcher
+      (with <code>DEBUG.bat</code> for troubleshooting).</td>
   </tr>
   <tr>
     <td><b>SHA256SUMS.txt</b></td>
-    <td>File hashes, so you can verify that the download has not been tampered with.
+    <td>Hashes for both files, so you can verify that the download has not been tampered with.
       <a href="https://github.com/Linch-Lab/DRTxECM/releases/latest">Get it from the Releases page</a></td>
   </tr>
   <tr>
@@ -73,13 +130,13 @@
   </tr>
   <tr>
     <td><b>Example data</b></td>
-    <td>EIS examples and tutorial notebooks included in the repository:
+    <td>EIS examples and tutorial notebooks included in the repository (also inside the Python edition):
       <a href="https://github.com/Linch-Lab/DRTxECM/tree/master/tutorial">tutorial/</a>,
       <a href="https://github.com/Linch-Lab/DRTxECM/tree/master/EIS%20data">EIS data/</a></td>
   </tr>
   <tr>
     <td><b>User manual</b></td>
-    <td>The original pyDRTtools manual (PDF):
+    <td>The original pyDRTtools manual (PDF, also inside the Python edition):
       <a href="https://github.com/Linch-Lab/DRTxECM/blob/master/manual/pyDRTtools_manual.pdf">pyDRTtools_manual.pdf</a></td>
   </tr>
   <tr>
@@ -90,8 +147,9 @@
 
 <h2 id="verify">Verify the download (optional)</h2>
 
-<p>In Command Prompt, run:</p>
-<pre>certutil -hashfile DRTxECM-win64.zip SHA256</pre>
+<p>In Command Prompt, run (use whichever file you downloaded):</p>
+<pre>certutil -hashfile DRTxECM-win64.zip SHA256
+certutil -hashfile DRTxECM-python.zip SHA256</pre>
 <p>Compare the output with the contents of <code>SHA256SUMS.txt</code>; if they match, the file is intact and unmodified.</p>
 
 <h2>System requirements</h2>

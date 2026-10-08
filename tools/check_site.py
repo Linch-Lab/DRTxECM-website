@@ -382,6 +382,9 @@ def check_app_repo():
               "assets/DRTxECM.ico",
               "packaging/extras/診斷.cmd",
               "packaging/extras/使用前必讀.txt",
+              "packaging/python-edition/START-HERE.bat",
+              "packaging/python-edition/DEBUG.bat",
+              "packaging/python-edition/READ-ME-FIRST.txt",
               ".github/workflows/release.yml"]
     bad = False
     for item in wanted:
@@ -392,14 +395,28 @@ def check_app_repo():
     if "!DRTxECM.spec" not in gitignore:
         F("app .gitignore does not un-ignore DRTxECM.spec")
         bad = True
-    # .bat 必須是純 ASCII，否則 cmd.exe 會讀錯前面的行
-    with open(os.path.join(APP_REPO, "build.bat"), "rb") as handle:
-        raw = handle.read()
-    if any(b > 127 for b in raw):
-        F("build.bat contains non-ASCII bytes (cmd.exe will misparse it)")
-        bad = True
+    # .bat/.cmd 必須是純 ASCII 且 CRLF：
+    #   - 非 ASCII 位元組會讓 cmd.exe 讀錯前面的行（CP950 碼頁的位移問題）
+    #   - 只有 LF 的批次檔會被 cmd.exe 誤判（多行 if 區塊、for /f 迴圈）
+    scripts = ["build.bat",
+               "packaging/extras/診斷.cmd",
+               "packaging/python-edition/START-HERE.bat",
+               "packaging/python-edition/DEBUG.bat"]
+    for rel in scripts:
+        path = os.path.join(APP_REPO, rel.replace("/", os.sep))
+        if not os.path.exists(path):
+            continue
+        with open(path, "rb") as handle:
+            raw = handle.read()
+        if any(b > 127 for b in raw):
+            F(f"{rel}: contains non-ASCII bytes (cmd.exe will misparse it)")
+            bad = True
+        crlf = raw.count(b"\r\n")
+        if raw.count(b"\n") != crlf:
+            F(f"{rel}: has bare LF line endings (cmd.exe will misparse it)")
+            bad = True
     if not bad:
-        O("app repo packaging files complete; build.bat is pure ASCII")
+        O("app repo packaging files complete; all .bat/.cmd are ASCII + CRLF")
 
 
 def main():

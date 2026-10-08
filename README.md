@@ -12,13 +12,26 @@
 | **`Linch-Lab/DRTxECM-website`**（本倉庫） | 官網（本目錄即網站根目錄） |
 | [`Linch-Lab/DRTxECM`](https://github.com/Linch-Lab/DRTxECM) | 應用程式原始碼、PyInstaller 打包設定、GitHub Actions 發佈流程 |
 
-網站上的下載按鈕指向應用程式倉庫的 GitHub Releases：
+網站提供**兩種發行版本**，下載按鈕都指向應用程式倉庫的 GitHub Releases：
 
 ```
-https://github.com/Linch-Lab/DRTxECM/releases/latest/download/DRTxECM-win64.zip
+免安裝版   https://github.com/Linch-Lab/DRTxECM/releases/latest/download/DRTxECM-win64.zip
+Python 版  https://github.com/Linch-Lab/DRTxECM/releases/latest/download/DRTxECM-python.zip
 ```
 
-> **注意**：在應用程式倉庫還沒有任何 Release 之前，這個網址會回 404。
+| | 免安裝版 | Python 版 |
+|---|---|---|
+| 大小 | 約 126 MB | 約 2.6 MB |
+| 需要 Python | 不需要 | 3.10 或 3.11 |
+| 第一次啟動 | 解壓即用 | 需下載約 150 MB 套件 |
+| 電腦阻擋未簽章程式時 | 可能被擋 | 通常可以（`python.exe` 有簽章） |
+| 學校封鎖 PyPI 時 | 可以 | 無法安裝 |
+
+兩者在 `download.html` 與 `en/download.html` 上有並列的比較表。
+`DRTxECM-python.zip` 由應用程式倉庫的 release workflow 產生，
+內容與啟動器說明見該倉庫的 `packaging/README.md`。
+
+> **注意**：在應用程式倉庫還沒有任何 Release 之前，這兩個網址都會回 404。
 > 發佈順序請見 [部署網站.md](部署網站.md)。
 
 ---

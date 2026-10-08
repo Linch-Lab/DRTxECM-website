@@ -39,14 +39,65 @@
 </nav>
 
 <h1>下載</h1>
-<p class="lead">目前版本 <b>v0.2.0</b> ｜ Windows 10 / 11（64 位元）</p>
+<p class="lead">目前版本 <b>v0.2.0</b> ｜ Windows 10 / 11（64 位元）｜ 兩種版本可選</p>
+
+<h2>選哪一個？</h2>
+
+<table>
+  <tr>
+    <th style="width:26%"></th>
+    <th style="width:37%">免安裝版（建議）</th>
+    <th>Python 版</th>
+  </tr>
+  <tr>
+    <td>下載大小</td>
+    <td>約 126&nbsp;MB</td>
+    <td><b>約 2.6&nbsp;MB</b></td>
+  </tr>
+  <tr>
+    <td>需要 Python 嗎</td>
+    <td>不需要</td>
+    <td>需要 <b>3.10 或 3.11</b></td>
+  </tr>
+  <tr>
+    <td>第一次啟動</td>
+    <td>解壓後直接可用</td>
+    <td>自動下載約 150&nbsp;MB 的套件（需網路，數分鐘）</td>
+  </tr>
+  <tr>
+    <td>電腦會阻擋未簽章程式時</td>
+    <td>可能無法執行</td>
+    <td><b>通常可以</b>（<code>python.exe</code> 有簽章）</td>
+  </tr>
+  <tr>
+    <td>學校封鎖 PyPI 時</td>
+    <td><b>可以</b>（不需下載套件）</td>
+    <td>無法安裝套件</td>
+  </tr>
+  <tr>
+    <td>適合誰</td>
+    <td>絕大多數人</td>
+    <td>已經有 Python，或免安裝版被政策擋住</td>
+  </tr>
+</table>
+
+<h2>下載</h2>
 
 <div class="dl">
-  <a class="big" href="https://github.com/Linch-Lab/DRTxECM/releases/latest/download/DRTxECM-win64.zip">下載 DRTxECM-win64.zip</a>
+  <a class="big" href="https://github.com/Linch-Lab/DRTxECM/releases/latest/download/DRTxECM-win64.zip">下載免安裝版 DRTxECM-win64.zip</a>
   <div class="meta">
     免安裝 ｜ 解壓即用 ｜ 不需安裝 Python<br>
     下載檔約 <b>126&nbsp;MB</b>，解壓後約 <b>334&nbsp;MB</b>（約 1,430 個檔案）<br>
     直接點擊即開始下載，若瀏覽器沒有反應請見下方<a href="#trouble">下載疑難</a>
+  </div>
+</div>
+
+<div class="dl">
+  <a class="big" href="https://github.com/Linch-Lab/DRTxECM/releases/latest/download/DRTxECM-python.zip">下載 Python 版 DRTxECM-python.zip</a>
+  <div class="meta">
+    需要 Python <b>3.10 或 3.11</b> ｜ 下載檔僅約 <b>2.6&nbsp;MB</b><br>
+    解壓後雙擊 <code>START-HERE.bat</code>，第一次啟動會自動建立環境並安裝套件<br>
+    適合「免安裝版被公司或學校政策擋住」的情況
   </div>
 </div>
 
@@ -59,11 +110,17 @@
   </tr>
   <tr>
     <td><b>DRTxECM-win64.zip</b></td>
-    <td>主程式。解壓後執行 <code>DRTxECM.exe</code> 即可，免安裝。</td>
+    <td>免安裝版主程式。解壓後執行 <code>DRTxECM.exe</code> 即可，不需 Python。</td>
+  </tr>
+  <tr>
+    <td><b>DRTxECM-python.zip</b></td>
+    <td>Python 版。內含原始碼、範例資料、教學 notebook 與使用手冊，
+      外加中文的「<code>READ-ME-FIRST.txt</code>」與啟動器
+      <code>START-HERE.bat</code>（另有除錯用的 <code>DEBUG.bat</code>）。</td>
   </tr>
   <tr>
     <td><b>SHA256SUMS.txt</b></td>
-    <td>檔案雜湊值，可驗證下載檔未被竄改。
+    <td>兩個檔案的雜湊值，可驗證下載檔未被竄改。
       <a href="https://github.com/Linch-Lab/DRTxECM/releases/latest">在 Releases 頁面取得</a></td>
   </tr>
   <tr>
@@ -73,13 +130,13 @@
   </tr>
   <tr>
     <td><b>範例資料</b></td>
-    <td>倉庫內附 EIS 範例與教學 notebook：
+    <td>倉庫內附 EIS 範例與教學 notebook（Python 版已一併包含）：
       <a href="https://github.com/Linch-Lab/DRTxECM/tree/master/tutorial">tutorial/</a>、
       <a href="https://github.com/Linch-Lab/DRTxECM/tree/master/EIS%20data">EIS data/</a></td>
   </tr>
   <tr>
     <td><b>使用手冊</b></td>
-    <td>pyDRTtools 原始手冊（PDF）：
+    <td>pyDRTtools 原始手冊（PDF，Python 版已一併包含）：
       <a href="https://github.com/Linch-Lab/DRTxECM/blob/master/manual/pyDRTtools_manual.pdf">pyDRTtools_manual.pdf</a></td>
   </tr>
   <tr>
@@ -90,8 +147,9 @@
 
 <h2 id="verify">驗證下載檔（選用）</h2>
 
-<p>在命令提示字元執行：</p>
-<pre>certutil -hashfile DRTxECM-win64.zip SHA256</pre>
+<p>在命令提示字元執行（檔名請換成你下載的那一個）：</p>
+<pre>certutil -hashfile DRTxECM-win64.zip SHA256
+certutil -hashfile DRTxECM-python.zip SHA256</pre>
 <p>把輸出與 <code>SHA256SUMS.txt</code> 的內容比對，一致即表示檔案完整未被修改。</p>
 
 <h2>系統需求</h2>
